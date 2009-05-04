@@ -1,6 +1,8 @@
-#include<main.hpp>
-#include<iostream>
+#include <Main.h>
+#include <iostream>
+
 using namespace std;
+
 void TestClass::print () {
 	cout << "Test Class"<<endl;
 }
