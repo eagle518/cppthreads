@@ -13,7 +13,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign dist-bzip2])
 AC_PROG_CXX
 # Checks for libraries.
 #Checks for header ﬁles.
-AC_CONFIG_SRCDIR([src/main.cpp])
+AC_CONFIG_SRCDIR([src/Main.cpp])
 #Checks for typedefs, structures, and compiler characteristics.
 #Checks for library functions.
 #Output ﬁles.
