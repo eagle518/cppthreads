@@ -20,6 +20,8 @@ namespace cppthreads {
 			Semaphore(int32_t initValue);
 			void post();
 			void wait();
+			void wait(int32_t timeout);
+			bool tryWait();
 			int32_t getValue();
 			virtual ~Semaphore();
 
