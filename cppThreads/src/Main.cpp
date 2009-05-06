@@ -1,13 +1,8 @@
-#include <Main.h>
 #include <iostream>
+#include "Semaphore.h"
 
-using namespace std;
-
-void TestClass::print () {
-	cout << "Test Class"<<endl;
-}
-int main(void)
-{
-	TestClass ts;
-	ts.print();
+int main(void){
+	using namespace cppthreads;
+	Semaphore mySemaphore;
+	std::cout << "Hello Semaphores" << std::endl;
 }
