@@ -7,13 +7,13 @@
 
 #ifndef RUNNABLE_H_
 #define RUNNABLE_H_
+#include "SuperObject.h"
 
-class Runnable{
+class Runnable: public SuperObject {
 	private:
 
 	public:
-		void run() = 0;
-
+		virtual void run() = 0;
 };
 
 #endif /* RUNNABLE_H_ */

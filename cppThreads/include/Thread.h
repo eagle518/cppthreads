@@ -8,6 +8,7 @@
 #ifndef THREAD_H_
 #define THREAD_H_
 #include "Runnable.h"
+#include "SuperObject.h"
 #include <iostream>
 
 /**
@@ -51,7 +52,7 @@ static enum State {
 /**
  *
  */
-class Thread: Runnable {
+class Thread: Runnable, SuperObject {
 private:
 	/**
 	 * Current thread state

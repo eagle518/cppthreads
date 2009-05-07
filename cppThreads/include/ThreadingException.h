@@ -7,8 +7,10 @@
 
 #ifndef THREADINGEXCEPTION_H_
 #define THREADINGEXCEPTION_H_
+#include "SuperObject.h"
+
 namespace cppthreads {
-	class ThreadingException {
+	class ThreadingException : public SuperObject{
 		public:
 			ThreadingException(const char *message, int32_t errorCode) : message_(message), errorCode_(errorCode){
 

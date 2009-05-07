@@ -9,8 +9,9 @@
 #define SYNCHRONOUSQUEUE_H_
 
 #include "BlockingQueue.h"
+#include "SuperObject.h"
 
-class SynchronousQueue: public BlockingQueue {
+class SynchronousQueue: public BlockingQueue, public SuperObject {
 public:
 	SynchronousQueue();
 	virtual ~SynchronousQueue();
