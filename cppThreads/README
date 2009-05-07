@@ -1,0 +1,16 @@
+ * cppThreads ( POSIX Threading Wrapper for C++ )
+
+== Prerequisities ==
+ 1- makesure you have autotools installed (GNU build toolchain)
+ 2- gtest 1.3+ installed (needed only to run the tests)
+ 3- libtool must be installed
+
+== Build ==
+
+There are several scripts written to make your life easier, simply start with ./autogen.sh that would generate a whole bunch of new files then simply issue ./buildme
+
+the libraries are then built and moved to libs/
+
+if you want to run the test cases, cd tests/ and use the script ./autogen.sh and make 
+
+then use the ./runner to start all of the test cases

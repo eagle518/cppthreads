@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = foreign
-LDADD = -L$(libdir) -lpthread -lgtest -lcppthreads
+LDADD = -L$(srcdir)/../libs -lpthread -lgtest -lcppthreads
 AM_CPPFLAGS = -fPIC -D_REENTRANT -I$(srcdir)/../include
 AM_CFLAGS = -fPIC -D_REENTRANT -I$(srcdir)/../include
 bin_PROGRAMS = runner
