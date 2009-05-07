@@ -6,7 +6,6 @@ libcppthreads_la_CPPFLAGS = -fPIC -D_REENTRANT -I$(srcdir)/../include
 libcppthreads_la_CFLAGS = -fPIC -D_REENTRANT -I$(srcdir)/../include
 libcppthreads_la_SOURCES = \
 ArrayBlockingQueue.cpp\
-BlockingQueue.cpp\
 LinkedBlockingQueue.cpp\
 Mutex.cpp\
 Semaphore.cpp\

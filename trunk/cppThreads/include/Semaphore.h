@@ -9,12 +9,12 @@
 #define SEMAPHORE_H_
 
 #include <semaphore.h>
-
+#include "SuperObject.h"
 namespace cppthreads {
 	/**
 	 * Semaphores are used to control access to a certain piece of code or object
 	 */
-	class Semaphore {
+	class Semaphore : public SuperObject{
 		public:
 			Semaphore();
 			Semaphore(int32_t initValue);
