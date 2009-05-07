@@ -2,7 +2,7 @@
  * InvalidSemaphore.h
  *
  *  Created on: May 6, 2009
- *      Author: ahmed
+ *      Author: ahmed soliman
  */
 
 #ifndef INVALIDSEMAPHORE_H_
