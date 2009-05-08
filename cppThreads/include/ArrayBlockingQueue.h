@@ -9,11 +9,11 @@
 #define ARRAYBLOCKINGQUEUE_H_
 
 #include "BlockingQueue.h"
-
-class ArrayBlockingQueue: public BlockingQueue {
-public:
-	ArrayBlockingQueue();
-	virtual ~ArrayBlockingQueue();
-};
-
+namespace cppthreads {
+	class ArrayBlockingQueue: public BlockingQueue {
+		public:
+			ArrayBlockingQueue();
+			virtual ~ArrayBlockingQueue();
+	};
+}
 #endif /* ARRAYBLOCKINGQUEUE_H_ */
