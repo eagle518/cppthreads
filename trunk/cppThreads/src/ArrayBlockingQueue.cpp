@@ -6,12 +6,13 @@
  */
 
 #include "ArrayBlockingQueue.h"
+namespace cppthreads {
+	ArrayBlockingQueue::ArrayBlockingQueue() {
+		// TODO Auto-generated constructor stub
 
-ArrayBlockingQueue::ArrayBlockingQueue() {
-	// TODO Auto-generated constructor stub
+	}
 
-}
-
-ArrayBlockingQueue::~ArrayBlockingQueue() {
-	// TODO Auto-generated destructor stub
+	ArrayBlockingQueue::~ArrayBlockingQueue() {
+		// TODO Auto-generated destructor stub
+	}
 }
