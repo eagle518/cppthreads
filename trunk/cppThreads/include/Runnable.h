@@ -7,13 +7,21 @@
 
 #ifndef RUNNABLE_H_
 #define RUNNABLE_H_
+
+#include<iostream>
 #include "SuperObject.h"
+using namespace std;
 
-class Runnable: public SuperObject {
-	private:
+namespace cppthreads {
 
-	public:
-		virtual void run() = 0;
-};
+	class Runnable: public SuperObject {
+		private:
 
+		public:
+			virtual void run() {
+				cout << "You have to override this method" << endl;
+			}
+			virtual ~Runnable();
+	};
+}
 #endif /* RUNNABLE_H_ */

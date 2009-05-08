@@ -10,104 +10,93 @@
 #include "Runnable.h"
 #include "SuperObject.h"
 #include <iostream>
+#include <pthread.h>
+#include <string>
+using namespace std;
 
 /**
- * Thread states that represents its life cycle.
- * The thread state goes over many changes throughout its life, this Enum represents those states.
- * NEW : Thread has not yet started.
- * RUNNABLE: Thread is in the queue ready and waiting to take its turn to run.
- * BLOCKED: Thread is blocked on a some object lock.
- * WAITING: Thread is waiting indefinitely for another thread to perform a particular action
- * TIMED_WAITING: Thread is waiting indefinitely for another thread to perform an action up to a specific time
- * TERMINATED: Thread finished running
+ *	the pthread method
  */
-static enum State {
+void * init(void *);
 
-	/**
-	 *Thread has not yet started.
-	 */
-	NEW,
-	/**
-	 * Thread is in the queue ready and waiting to take its turn to run.
-	 */
-	RUNNABLE,
-	/**
-	 * Thread is blocked on a some object lock.
-	 */
-	BLOCKED,
-	/**
-	 * Thread is waiting indefinitely for another thread to perform a particular action
-	 */
-	WAITING,
-	/**
-	 * Thread is waiting indefinitely for another thread to perform an action up to a specific time
-	 */
-	TIMED_WAITING,
-	/**
-	 * Thread finished running
-	 */
-	TERMINATED
-};
+namespace cppthreads {
+	class Thread: public Runnable, public SuperObject {
+		private:
+			/**
+			 * Thread priority
+			 */
+			int priority;
+			/**
+			 * Unique thread ID
+			 */
+			int id;
+			/**
+			 *
+			 */
+			void * returnResult;
+			string name;
+			/**
+			 * Our runnable object, it should be passed in the constructor
+			 */
+			Runnable * target;
+			pthread_t * pthread;
+		protected:
+			/**
+			 * Default constructor.
+			 * Can only be used if you extend Thread to override the run method.
+			 */
+			Thread();
+			/**
+			 * Creates a new Thread and sets its name.
+			 */
+			Thread(string name);
+		public:
+			/**
+			 * Creates a new Thread object that'll call target's run method in a new execution thread
+			 */
+			Thread(Runnable & target);
+			/**
+			 * Creates a new Thread object with name that'll call target's run method in a new execution thread
+			 */
+			Thread(Runnable & target, string name);
 
-/**
- *
- */
-class Thread: Runnable, SuperObject {
-private:
-	/**
-	 * Current thread state
-	 */
-	State state;
-	/**
-	 * Thread priority
-	 */
-	int priority;
-	/**
-	 * Unique thread ID
-	 */
-	int id;
+			~Thread();
 
-	String name;
-	/**
-	 * Our runnable object, it should be passed in the constructor
-	 */
-	Runnable target;
-public:
-	Thread();
-	Thread(Runnable target);
-	Thread(String name);
-	Thread(Runnable target, String name);
-	void start();
-	void run();
-	void join();
-	void join(int millis);
-	State getState() const
-    {
-		return state;
-    }
 
-    int getPriority() const
-    {
-        return priority;
-    }
+			/**
+			 * Starts execution of
+			 */
+			void start();
+			/**
+			 * The start method of the new thread.
+			 * Override this method and put the code which you want to run in a new thread inside.
+			 */
+			virtual void run();
+			/**
+			 * Puts thread to sleep for "millis" seconds
+			 */
+			void sleep(int millis);
+			/**
+			 * Wait until this thread finish execution.
+			 * Thread calling this join() will block until this Thread finishes execution
+			 */
+			void join();
+			/**
+			 * Wait until thread finish execution up to timeout which is expressed in millis
+			 */
+			void join(int timeout);
 
-    void setPriority(int priority);
+			int getPriority() const;
 
-    int getId() const
-    {
-        return id;
-    }
+			void setPriority(int priority);
 
-    String getName() const
-    {
-        return name;
-    }
+			int getId() const;
 
-    void setName(String name)
-    {
-        this->name = name;
-    }
+			string getName() const;
 
-};
+			void setName(string name);
 
+
+	};
+}
 #endif /* THREAD_H_ */

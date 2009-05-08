@@ -9,7 +9,9 @@ ArrayBlockingQueue.cpp\
 LinkedBlockingQueue.cpp\
 Mutex.cpp\
 Semaphore.cpp\
-SynchronousQueue.cpp
+SynchronousQueue.cpp\
+Thread.cpp\
+Runnable.cpp
 
 # include sources in include
 #AM_CPPFLAGS = -I$(srcdir)/../include -D_REENTRANT
