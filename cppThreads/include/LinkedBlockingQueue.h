@@ -78,9 +78,20 @@ namespace cppthreads {
 
 			virtual ~LinkedBlockingQueue();
 		private:
+			bool canAdd_();
 			std::list<SuperObject *> backend_;
 			uint32_t initialCapacity_;
-			Semaphore *sem_;
+
+			bool limited_;
+			/**
+			 * we are using pointers here because there are certainn situations where you
+			 * don't want to instantiate both semaphores.
+			 */
+			// will block on read when the queue is empty, its value is the size of the queue
+			Semaphore *readSem_;
+			// will block on write when you don't have any free space, its value is the remainingCapacity
+			Semaphore *writeSem_;
+
 	};
 }
 #endif /* LINKEDBLOCKINGQUEUE_H_ */

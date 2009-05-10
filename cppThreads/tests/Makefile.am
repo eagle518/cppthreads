@@ -5,7 +5,8 @@ AM_CFLAGS = -fPIC -D_REENTRANT -I$(srcdir)/../include
 bin_PROGRAMS = runner
 runner_SOURCES = \
 runner.cpp\
-SemaphoreTest.cpp
+SemaphoreTest.cpp\
+MutexTest.cpp
 
 # include sources in include
 #AM_CPPFLAGS = -I$(srcdir)/../include -D_REENTRANT

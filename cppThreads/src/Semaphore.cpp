@@ -17,11 +17,11 @@ namespace cppthreads {
 		sem_init(&semHandle_, 0, 0);
 	}
 
-	Semaphore::Semaphore(int32_t initValue) {
+	Semaphore::Semaphore(uint32_t initValue) {
 		sem_init(&semHandle_, 0, initValue);
 	}
 
-	int32_t Semaphore::getValue() {
+	uint32_t Semaphore::getValue() {
 		int32_t currentValue = 0;
 		int32_t res = sem_getvalue(&semHandle_, &currentValue);
 		if (res != 0) {
@@ -65,7 +65,7 @@ namespace cppthreads {
 		}
 	}
 
-	bool Semaphore::wait(int32_t timeout) {
+	bool Semaphore::wait(uint32_t timeout) {
 		struct timespec timeoutStructure;
 		bool ret = false;
 		if (clock_gettime(CLOCK_REALTIME, &timeoutStructure) == -1) {

@@ -17,12 +17,12 @@ namespace cppthreads {
 	class Semaphore : public SuperObject{
 		public:
 			Semaphore();
-			Semaphore(int32_t initValue);
+			Semaphore(uint32_t initValue);
 			void post();
 			void wait();
-			bool wait(int32_t timeout);
+			bool wait(uint32_t timeout);
 			bool tryWait();
-			int32_t getValue();
+			uint32_t getValue();
 			virtual ~Semaphore();
 
 		private:
