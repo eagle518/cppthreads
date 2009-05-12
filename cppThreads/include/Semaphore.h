@@ -18,7 +18,7 @@ namespace cppthreads {
 		public:
 			Semaphore();
 			Semaphore(uint32_t initValue);
-			void post();
+			void signal();
 			void wait();
 			bool wait(uint32_t timeout);
 			bool tryWait();

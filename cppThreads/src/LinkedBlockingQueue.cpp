@@ -18,11 +18,11 @@ namespace cppthreads {
 	}
 
 	bool LinkedBlockingQueue::add(SuperObject *object) {
-		writeSem_->post();
+		writeSem_->signal();
 
 	}
 	bool LinkedBlockingQueue::offer(SuperObject *object) {
-		writeSem_->post();
+		writeSem_->signal();
 	}
 	bool LinkedBlockingQueue::offer(SuperObject *object, uint32_t timeout) {
 
