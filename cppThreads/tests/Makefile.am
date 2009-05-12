@@ -1,12 +1,13 @@
 AUTOMAKE_OPTIONS = foreign
-LDADD = -L$(srcdir)/../libs -lpthread -lgtest -lcppthreads -lrt
-AM_CPPFLAGS = -fPIC -D_REENTRANT -I$(srcdir)/../include
-AM_CFLAGS = -fPIC -D_REENTRANT -I$(srcdir)/../include
+LDADD = -L$(srcdir)/../libs -lgtest -lcppthreads -lpthread -lrt 
+AM_CPPFLAGS = -ggdb3 -O0 -fPIC -D_REENTRANT -I$(srcdir)/../include
+AM_CFLAGS = -ggdb3 -fPIC -D_REENTRANT -I$(srcdir)/../include
 bin_PROGRAMS = runner
 runner_SOURCES = \
 runner.cpp\
 SemaphoreTest.cpp\
-MutexTest.cpp
+MutexTest.cpp\
+LinkedBlockingQueueTest.cpp
 
 # include sources in include
 #AM_CPPFLAGS = -I$(srcdir)/../include -D_REENTRANT

@@ -10,8 +10,9 @@
 
 #include "BlockingQueue.h"
 #include "Semaphore.h"
-
+#include "Mutex.h"
 #include <list>
+
 namespace cppthreads {
 	class LinkedBlockingQueue: public BlockingQueue {
 		public:
@@ -78,8 +79,9 @@ namespace cppthreads {
 
 			virtual ~LinkedBlockingQueue();
 		private:
+			uint32_t remainingCapacity_();
 			bool canAdd_();
-			std::list<SuperObject *> backend_;
+			std::list<SuperObject *> *backend_;
 			uint32_t initialCapacity_;
 
 			bool limited_;
@@ -91,6 +93,8 @@ namespace cppthreads {
 			Semaphore *readSem_;
 			// will block on write when you don't have any free space, its value is the remainingCapacity
 			Semaphore *writeSem_;
+
+			Mutex *lock_;
 
 	};
 }
