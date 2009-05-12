@@ -35,9 +35,9 @@ namespace cppthreads {
 	/**
 	 * Increments (unlocks) the semaphore, if the semaphore is increased of a zero value, any waiting thread (blocking on wait())
 	 * will be unlocked and will decrease the lock, note that this call is atomic so you don't have to worry about several threads
-	 * calling post() and wait()
+	 * calling signal() and wait()
 	 */
-	void Semaphore::post() {
+	void Semaphore::signal() {
 		int32_t res = sem_post(&semHandle_);
 		if (res != 0) {
 			throw InvalidSemaphore("Cannot increase an invalid semaphore", res);
@@ -45,7 +45,7 @@ namespace cppthreads {
 	}
 	/**
 	 * Decrement (locks) the semnote that this call is atomic so you don't have to worry about several threads
-	 * calling post() and wait()aphore, if the semaphore value is already larger than 0 the call will return immediately and the semaphore
+	 * calling signal() and wait()aphore, if the semaphore value is already larger than 0 the call will return immediately and the semaphore
 	 * will decreas. If the value is already zero the call will block until we can do the decrement (somebody else calls post)
 	 * note that this call is atomic so you don't have to worry about several threads
 	 * calling post() and wait()

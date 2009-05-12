@@ -6,7 +6,7 @@ namespace cppthreads {
 	TEST(SemaphoreTest, testWait)	{
 		Semaphore sem;
 		ASSERT_EQ(0, sem.getValue());
-		sem.post();
+		sem.signal();
 		sem.wait();
 		ASSERT_EQ(0, sem.getValue());
 	}
@@ -26,7 +26,7 @@ namespace cppthreads {
 		Semaphore sem;
 		ASSERT_EQ(0, sem.getValue());
 		ASSERT_EQ(false, sem.tryWait());
-		sem.post();
+		sem.signal();
 		ASSERT_EQ(true, sem.tryWait());
 		ASSERT_EQ(false, sem.tryWait());
 	}
@@ -34,7 +34,7 @@ namespace cppthreads {
 		Semaphore sem;
 		ASSERT_EQ(0, sem.getValue());
 		ASSERT_EQ(false, sem.wait(5));
-		sem.post();
+		sem.signal();
 		ASSERT_EQ(true, sem.wait(5));
 	}
 
