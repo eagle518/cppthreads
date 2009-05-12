@@ -10,7 +10,9 @@
 class SuperObject {
 	public:
 		virtual ~SuperObject() {};
-
+		virtual const char *toString() const{
+			return "SuperObject <Standard>";
+			};
 	protected:
 		SuperObject() {};
 };
