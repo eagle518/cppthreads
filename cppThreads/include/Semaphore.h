@@ -8,14 +8,16 @@
 #ifndef SEMAPHORE_H_
 #define SEMAPHORE_H_
 
-#include <semaphore.h>
 #include "SuperObject.h"
+#include <semaphore.h>
+#include <limits.h>
 namespace cppthreads {
 	/**
 	 * Semaphores are used to control access to a certain piece of code or object
 	 */
 	class Semaphore : public SuperObject{
 		public:
+			static const uint32_t MAX_VALUE = SEM_VALUE_MAX;
 			Semaphore();
 			Semaphore(uint32_t initValue);
 			void signal();

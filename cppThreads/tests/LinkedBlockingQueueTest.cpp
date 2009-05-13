@@ -51,22 +51,30 @@ namespace cppthreads {
 		ASSERT_TRUE(queue->offer(new DummyObject(3)));
 		ASSERT_TRUE(queue->offer(new DummyObject(4)));
 		ASSERT_TRUE(queue->add(new DummyObject(5)));
-
+		ASSERT_EQ(5, queue->size());
 		SuperObject *tmp1 = queue->take();
 		ASSERT_EQ(dummy1, tmp1);
+		ASSERT_EQ(4, queue->size());
 		delete tmp1;
 		SuperObject *tmp2 = queue->element();
+		ASSERT_EQ(4, queue->size());
 		ASSERT_TRUE(tmp2 != NULL);
 
 		delete queue->take();
+		ASSERT_EQ(3, queue->size());
 		delete queue->take();
+		ASSERT_EQ(2, queue->size());
 		delete queue->take();
+		ASSERT_EQ(1, queue->size());
 		SuperObject *tmp3 = queue->poll(3);
 		ASSERT_TRUE(tmp3 != NULL);
 		if (tmp3 != NULL) {
 			delete tmp3;
 		}
+		ASSERT_EQ(0, queue->size());
 		ASSERT_EQ(NULL, queue->poll(3));
+		ASSERT_EQ(NULL, queue->element());
+
 		delete queue;
 	}
 }
