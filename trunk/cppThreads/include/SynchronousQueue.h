@@ -10,11 +10,11 @@
 
 #include "BlockingQueue.h"
 #include "SuperObject.h"
-
-class SynchronousQueue: public BlockingQueue, public SuperObject {
-public:
-	SynchronousQueue();
-	virtual ~SynchronousQueue();
-};
-
+namespace cppthreads {
+	class SynchronousQueue: public BlockingQueue {
+		public:
+			SynchronousQueue();
+			virtual ~SynchronousQueue();
+	};
+}
 #endif /* SYNCHRONOUSQUEUE_H_ */

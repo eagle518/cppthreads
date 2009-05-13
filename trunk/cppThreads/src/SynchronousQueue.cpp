@@ -6,12 +6,13 @@
  */
 
 #include "SynchronousQueue.h"
+namespace cppthreads {
+	SynchronousQueue::SynchronousQueue() {
+		// TODO Auto-generated constructor stub
 
-SynchronousQueue::SynchronousQueue() {
-	// TODO Auto-generated constructor stub
+	}
 
-}
-
-SynchronousQueue::~SynchronousQueue() {
-	// TODO Auto-generated destructor stub
+	SynchronousQueue::~SynchronousQueue() {
+		// TODO Auto-generated destructor stub
+	}
 }

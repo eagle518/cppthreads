@@ -76,11 +76,16 @@ namespace cppthreads {
 			 * Returns the original capacity of the queue.
 			 */
 			virtual uint32_t getCapacity();
+			/**
+			 * Returns the count of the elements currently in the queue
+			 */
+			virtual uint32_t size();
 
 			virtual ~LinkedBlockingQueue();
 		private:
 			uint32_t remainingCapacity_();
 			bool canAdd_();
+			uint32_t size_();
 			std::list<SuperObject *> *backend_;
 			uint32_t initialCapacity_;
 

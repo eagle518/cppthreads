@@ -12,7 +12,7 @@ namespace cppthreads {
 	LinkedBlockingQueue::LinkedBlockingQueue() :
 		initialCapacity_(MAX_VALUE), limited_(false) {
 		readSem_ = new Semaphore();
-		writeSem_ = new Semaphore(SEM_VALUE_MAX);
+		writeSem_ = new Semaphore(MAX_VALUE);
 		lock_ = new Mutex();
 		backend_ = new std::list<SuperObject *>();
 	}
@@ -21,7 +21,7 @@ namespace cppthreads {
 		readSem_ = new Semaphore();
 		writeSem_ = new Semaphore(initialCapacity_);
 		lock_ = new Mutex();
-		backend_ = new std::list<SuperObject *>(initialCapacity_);
+		backend_ = new std::list<SuperObject *>();
 	}
 
 	bool LinkedBlockingQueue::add(SuperObject *object) {
@@ -88,8 +88,15 @@ namespace cppthreads {
 		return ret;
 	}
 	SuperObject *LinkedBlockingQueue::poll(uint32_t timeout) {
-		return NULL;
-	}
+		SuperObject *ret = NULL;
+		lock_->lock();
+		if (readSem_->wait(timeout)) {
+			ret = backend_->front();
+			backend_->pop_front();
+			writeSem_->signal();
+		}
+		lock_->unlock();
+		return ret;	}
 	SuperObject *LinkedBlockingQueue::take() {
 		SuperObject *ret = NULL;
 		lock_->lock();
@@ -101,7 +108,13 @@ namespace cppthreads {
 		return ret;
 	}
 	SuperObject *LinkedBlockingQueue::element() {
-		return NULL;
+		SuperObject *ret = NULL;
+		lock_->lock();
+		if (size_()) {
+			ret = backend_->front();
+		}
+		lock_->unlock();
+		return ret;
 	}
 	SuperObject *LinkedBlockingQueue::peek() {
 		return NULL;
@@ -140,6 +153,17 @@ namespace cppthreads {
 		if (limited_ && this->remainingCapacity() == 0) {
 			ret = false;
 		}
+		return ret;
+	}
+
+	uint32_t LinkedBlockingQueue::size() {
+		lock_->lock();
+		uint32_t ret = size_();
+		lock_->unlock();
+		return ret;
+	}
+	uint32_t LinkedBlockingQueue::size_() {
+		uint32_t ret = readSem_->getValue();
 		return ret;
 	}
 
