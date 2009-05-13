@@ -11,6 +11,7 @@ There are several scripts written to make your life easier, simply start with ./
 
 the libraries are then built and moved to libs/
 
-if you want to run the test cases, cd tests/ and use the script ./autogen.sh and make 
+if you want to run the tests, simply issue 
+ # make check 
 
 then use the ./runner to start all of the test cases
