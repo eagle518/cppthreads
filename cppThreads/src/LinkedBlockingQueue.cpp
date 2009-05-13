@@ -79,7 +79,7 @@ namespace cppthreads {
 		for (myIterator = backend_->begin(); myIterator != backend_->end(); myIterator++) {
 			if (object == *myIterator) {
 				backend_->erase(myIterator);
-				writeSem_->wait();
+				readSem_->wait();
 				ret = true;
 				break;
 			}
@@ -96,7 +96,9 @@ namespace cppthreads {
 			writeSem_->signal();
 		}
 		lock_->unlock();
-		return ret;	}
+		return ret;
+	}
+
 	SuperObject *LinkedBlockingQueue::take() {
 		SuperObject *ret = NULL;
 		lock_->lock();
@@ -107,7 +109,8 @@ namespace cppthreads {
 		lock_->unlock();
 		return ret;
 	}
-	SuperObject *LinkedBlockingQueue::element() {
+
+	SuperObject *LinkedBlockingQueue::peek() {
 		SuperObject *ret = NULL;
 		lock_->lock();
 		if (size_()) {
@@ -116,16 +119,19 @@ namespace cppthreads {
 		lock_->unlock();
 		return ret;
 	}
-	SuperObject *LinkedBlockingQueue::peek() {
-		return NULL;
-	}
 
 	bool LinkedBlockingQueue::contains(SuperObject *object) {
-		bool ret = false;
 		lock_->lock();
-
+		bool ret = false;
+		std::list<SuperObject *>::iterator myIterator;
+		for (myIterator = backend_->begin(); myIterator != backend_->end(); myIterator++) {
+			if (object == *myIterator) {
+				ret = true;
+				break;
+			}
+		}
 		lock_->unlock();
-		ret = false;
+		return ret;
 	}
 
 	uint32_t LinkedBlockingQueue::remainingCapacity() {
@@ -173,7 +179,7 @@ namespace cppthreads {
 		delete lock_;
 		std::list<SuperObject *>::iterator myIterator;
 		for (myIterator = backend_->begin(); myIterator != backend_->end(); myIterator++) {
-				delete *myIterator;
+			delete *myIterator;
 		}
 		delete backend_;
 	}

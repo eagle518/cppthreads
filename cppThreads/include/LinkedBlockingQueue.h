@@ -55,11 +55,6 @@ namespace cppthreads {
 			 */
 			virtual SuperObject *take();
 			/**
-			 *Retrieves, but does not remove, the head of this queue. This method differs from <b>peek</b> only in that it
-			 *Retrieves, throws QueueIsEmptyException exception if this queue is empty.
-			 */
-			virtual SuperObject *element();
-			/**
 			 * Retrieves, but does not remove, the head of this queue, or returns null if this queue is empty.
 			 */
 			virtual SuperObject *peek();

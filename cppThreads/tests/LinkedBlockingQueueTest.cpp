@@ -6,7 +6,8 @@
 #include <iostream>
 
 namespace cppthreads {
-	TEST(LinkedBlockingQueue, AddTest) {
+	TEST(LinkedBlockingQueue, AddTest)
+	{
 
 		BlockingQueue *queue1 = new LinkedBlockingQueue(5);
 		ASSERT_TRUE(queue1->add(new DummyObject(1)));
@@ -43,6 +44,51 @@ namespace cppthreads {
 		delete dummy1;
 	}
 
+	TEST(LinkedBlockingQueue, OrderingTest) {
+		BlockingQueue *queue = new LinkedBlockingQueue();
+		ASSERT_TRUE(queue->offer(new DummyObject(1)));
+		ASSERT_TRUE(queue->offer(new DummyObject(2)));
+		ASSERT_TRUE(queue->offer(new DummyObject(3)));
+		DummyObject *ret1 = dynamic_cast<DummyObject *>(queue->take());
+		ASSERT_TRUE(ret1 != NULL);
+		ASSERT_EQ(1, ret1->getData());
+		delete ret1;
+		DummyObject *ret2 = dynamic_cast<DummyObject *>(queue->take());
+		ASSERT_TRUE(ret2 != NULL);
+		ASSERT_EQ(2, ret2->getData());
+		delete ret2;
+
+		ASSERT_TRUE(queue->offer(new DummyObject(4)));
+
+		DummyObject *ret3 = dynamic_cast<DummyObject *>(queue->take());
+		ASSERT_TRUE(ret3 != NULL);
+		ASSERT_EQ(3, ret3->getData());
+		delete ret3;
+
+		DummyObject *ret4 = dynamic_cast<DummyObject *>(queue->take());
+		ASSERT_TRUE(ret4 != NULL);
+		ASSERT_EQ(4, ret4->getData());
+		delete ret4;
+		ASSERT_EQ(0, queue->size());
+		delete queue;
+	}
+	TEST(LinkedBlockingQueue, PeekAndRemoveTest) {
+
+		BlockingQueue *queue = new LinkedBlockingQueue();
+		SuperObject *dummy1 = new DummyObject(1);
+		ASSERT_TRUE(queue->offer(dummy1));
+		ASSERT_EQ(dummy1, queue->peek());
+
+		ASSERT_TRUE(queue->contains(dummy1));
+		ASSERT_TRUE(queue->remove(dummy1));
+		ASSERT_FALSE(queue->remove(dummy1));
+		ASSERT_FALSE(queue->contains(dummy1));
+		ASSERT_EQ(0, queue->size());
+
+		delete queue;
+		delete dummy1;
+	}
+
 	TEST(LinkedBlockingQueue, MixedTest) {
 		BlockingQueue *queue = new LinkedBlockingQueue(5);
 		SuperObject *dummy1 = new DummyObject(1);
@@ -56,7 +102,7 @@ namespace cppthreads {
 		ASSERT_EQ(dummy1, tmp1);
 		ASSERT_EQ(4, queue->size());
 		delete tmp1;
-		SuperObject *tmp2 = queue->element();
+		SuperObject *tmp2 = queue->peek();
 		ASSERT_EQ(4, queue->size());
 		ASSERT_TRUE(tmp2 != NULL);
 
@@ -73,7 +119,7 @@ namespace cppthreads {
 		}
 		ASSERT_EQ(0, queue->size());
 		ASSERT_EQ(NULL, queue->poll(3));
-		ASSERT_EQ(NULL, queue->element());
+		ASSERT_EQ(NULL, queue->peek());
 
 		delete queue;
 	}
