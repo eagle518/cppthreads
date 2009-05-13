@@ -12,6 +12,11 @@
 #include <limits.h>
 #include "Semaphore.h"
 namespace cppthreads {
+	/**
+	 * Blocking queues are queues that block its reader or writer if there are no elements or there is no remaining capacity, respectively.
+	 * NOTE: All blocking queue that has storage will take ownership of the inner objects, this means that if you destroy the queue, it'll
+	 * delete all the pointers of the objects inside the queue at then.
+	 */
 	class BlockingQueue: public SuperObject {
 		public:
 			static const uint32_t MAX_VALUE = Semaphore::MAX_VALUE;
