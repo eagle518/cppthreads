@@ -13,8 +13,8 @@ class SuperObject {
 		virtual const char *toString() const{
 			return "SuperObject <Standard>";
 			};
-		SuperObject() {};
 	protected:
+		SuperObject() {};
 };
 
 #endif /* SUPEROBJECT_H_ */
