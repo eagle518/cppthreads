@@ -9,8 +9,7 @@ LinkedBlockingQueue.cpp\
 Mutex.cpp\
 Semaphore.cpp\
 SynchronousQueue.cpp\
-Thread.cpp\
-Runnable.cpp
+Thread.cpp
 
 include_HEADERS = \
 $(top_srcdir)/include/LinkedBlockingQueue.h\
