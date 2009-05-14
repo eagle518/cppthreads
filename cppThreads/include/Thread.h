@@ -12,34 +12,34 @@
 #include <iostream>
 #include <pthread.h>
 #include <string>
+#include <sys/types.h>
 using namespace std;
 
-/**
- *	the pthread method
- */
-void * init(void *);
-
 namespace cppthreads {
-	class Thread: public Runnable, public SuperObject {
+	class Thread: public Runnable {
 		private:
 			/**
 			 * Thread priority
 			 */
-			int priority;
+			int32_t priority_;
 			/**
 			 * Unique thread ID
 			 */
-			int id;
+			int32_t id_;
 			/**
-			 *
+			 * The return value of the thread we join
 			 */
-			void * returnResult;
-			string name;
+			void * returnResult_;
+			/**
+			 * Thread name
+			 */
+			string name_;
+
 			/**
 			 * Our runnable object, it should be passed in the constructor
 			 */
-			Runnable * target;
-			pthread_t * pthread;
+			Runnable * target_;
+			pthread_t threadHandle_;
 		protected:
 			/**
 			 * Default constructor.
@@ -54,14 +54,13 @@ namespace cppthreads {
 			/**
 			 * Creates a new Thread object that'll call target's run method in a new execution thread
 			 */
-			Thread(Runnable & target);
+			Thread(Runnable *target);
 			/**
 			 * Creates a new Thread object with name that'll call target's run method in a new execution thread
 			 */
-			Thread(Runnable & target, string name);
+			Thread(Runnable *target, string name);
 
 			~Thread();
-
 
 			/**
 			 * Starts execution of
@@ -75,7 +74,7 @@ namespace cppthreads {
 			/**
 			 * Puts thread to sleep for "millis" seconds
 			 */
-			void sleep(int millis);
+			void sleep(int32_t millis);
 			/**
 			 * Wait until this thread finish execution.
 			 * Thread calling this join() will block until this Thread finishes execution
@@ -85,17 +84,24 @@ namespace cppthreads {
 			 * Wait until thread finish execution up to timeout which is expressed in millis
 			 */
 			void join(int timeout);
+			/**
+			 * Check if thread is running
+			 */
+			bool isRunning();
+			/**
+			 * Yield current execution
+			 */
+			void yield();
 
-			int getPriority() const;
+			int32_t getPriority() const;
 
-			void setPriority(int priority);
+			void setPriority(int32_t priority);
 
-			int getId() const;
+			int32_t getId() const;
 
 			string getName() const;
 
 			void setName(string name);
-
 
 	};
 }
