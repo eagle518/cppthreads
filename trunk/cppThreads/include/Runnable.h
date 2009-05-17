@@ -31,6 +31,9 @@ namespace cppthreads {
 			bool running_;
 		public:
 			virtual void run() = 0;
+			Runnable(): running_(false){
+
+			}
 			virtual ~Runnable(){
 			}
 

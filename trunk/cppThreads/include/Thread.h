@@ -39,7 +39,14 @@ namespace cppthreads {
 			 * Our runnable object, it should be passed in the constructor
 			 */
 			Runnable * target_;
+			/**
+			 * POSIX Thread handle
+			 */
 			pthread_t threadHandle_;
+			/**
+			 * Thread started once;
+			 */
+			bool started_;
 		protected:
 			/**
 			 * Default constructor.
@@ -89,7 +96,7 @@ namespace cppthreads {
 			 */
 			bool isRunning();
 			/**
-			 * Yield current execution
+			 * Yield current execution and wait in the run queue
 			 */
 			void yield();
 
