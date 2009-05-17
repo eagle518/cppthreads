@@ -9,6 +9,11 @@
 #include <errno.h>
 #include "Thread.h"
 #include "ThreadCreationFailedException.h"
+#include "ThreadAlreadyStartedException.h"
+#include "JoinedThreadAbnormalExitException.h"
+#include "ThreadJoiningFailedException.h"
+#include "PossibleThreadDeadLockException.h"
+
 using namespace std;
 
 namespace cppthreads_starter_utils {
@@ -18,51 +23,55 @@ namespace cppthreads_starter_utils {
 		thread->running_ = true;
 		try {
 			thread->run();
+			thread->running_ = false;
+			pthread_exit(NULL);
 		} catch (...) {
 			thread->running_ = false;
 			throw ;
 		}
-		thread->running_ = false;
-		pthread_exit(NULL);
 	}
 }
 
 namespace cppthreads {
 
-	Thread::Thread() : target_(this){
+	Thread::Thread() : started_(false),target_(this){
 
 	}
-	Thread::Thread(string name) : name_(name), target_(this){
-
-	}
-
-	Thread::Thread(Runnable *target) : target_(target) {
+	Thread::Thread(string name) : started_(false),name_(name), target_(this){
 
 	}
 
-	Thread::Thread(Runnable *target, string name) : target_(target), name_(name){
+	Thread::Thread(Runnable *target) : started_(false),target_(target) {
+
+	}
+
+	Thread::Thread(Runnable *target, string name) : started_(false),target_(target), name_(name){
 
 	}
 
 	void Thread::start() {
+		if (started_){
+			throw ThreadAlreadyStartedException("Thread already started, can't run thread twice.",-1);
+		}
+		started_ = true;
 		int32_t extCode = pthread_create(&threadHandle_, NULL,
 								cppthreads_starter_utils::init, (void *) target_);
 		if (extCode) {
 			switch (errno) {
 				case EAGAIN:
-					throw new ThreadCreationFailedException(
+					throw ThreadCreationFailedException(
 							"Thread creation failed due to lack of resources or due to some system limits",
 							errno);
 				case EINVAL:
-					throw new ThreadCreationFailedException(
+					throw ThreadCreationFailedException(
 							"Thread creation failed due to invalid attributes",
 							errno);
 				case EPERM:
-					throw new ThreadCreationFailedException(
+					throw ThreadCreationFailedException(
 							"You don't have enough permissions to set the required scheduling parameters or policy",
 							errno);
 				default: {
-					throw new ThreadCreationFailedException(
+					throw ThreadCreationFailedException(
 							"Unknown error occurred", errno);
 				}
 			}
@@ -86,7 +95,25 @@ namespace cppthreads {
 	 * Thread calling this join() will block until this Thread finishes execution
 	 */
 	void Thread::join() {
-		pthread_join(threadHandle_, &returnResult_);
+		int32_t extCode = pthread_join(threadHandle_, &returnResult_);
+
+		if (extCode) {
+			switch (errno){
+				case EINVAL:
+					throw ThreadJoiningFailedException("Thread is not a joinable thread.",errno);
+				case ESRCH:
+					throw ThreadJoiningFailedException("Can't find thread to join",errno);
+				case EDEADLK:
+					throw PossibleThreadDeadLockException("Dead lock detected",errno);
+				default :
+					throw ThreadJoiningFailedException("Unknown error occured",errno);
+			}
+		}
+		else {
+			if ((returnResult_)!= NULL){
+				throw JoinedThreadAbnormalExitException("Joined thread exited abnormally",-1);
+			}
+		}
 	}
 	/**
 	 * Wait until thread finish execution up to timeout which is expressed in millis
@@ -95,7 +122,7 @@ namespace cppthreads {
 	}
 
 	void Thread::yield(){
-
+		pthread_yield();
 	}
 	int Thread::getPriority() const {
 		return priority_;
