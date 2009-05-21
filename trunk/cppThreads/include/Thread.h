@@ -11,52 +11,13 @@
 #include "SuperObject.h"
 #include <iostream>
 #include <pthread.h>
+#include "Mutex.h"
 #include <string>
 #include <sys/types.h>
 using namespace std;
 
 namespace cppthreads {
 	class Thread: public Runnable {
-		private:
-			/**
-			 * Thread priority
-			 */
-			int32_t priority_;
-			/**
-			 * Unique thread ID
-			 */
-			int32_t id_;
-			/**
-			 * The return value of the thread we join
-			 */
-			void * returnResult_;
-			/**
-			 * Thread name
-			 */
-			string name_;
-
-			/**
-			 * Our runnable object, it should be passed in the constructor
-			 */
-			Runnable * target_;
-			/**
-			 * POSIX Thread handle
-			 */
-			pthread_t threadHandle_;
-			/**
-			 * Thread started once;
-			 */
-			bool started_;
-		protected:
-			/**
-			 * Default constructor.
-			 * Can only be used if you extend Thread to override the run method.
-			 */
-			Thread();
-			/**
-			 * Creates a new Thread and sets its name.
-			 */
-			Thread(string name);
 		public:
 			/**
 			 * Creates a new Thread object that'll call target's run method in a new execution thread
@@ -110,6 +71,50 @@ namespace cppthreads {
 
 			void setName(string name);
 
+		private:
+			/**
+			 * Thread priority
+			 */
+			int32_t priority_;
+			/**
+			 * Unique thread ID
+			 */
+			int32_t id_;
+			/**
+			 * The return value of the thread we join
+			 */
+			void * returnResult_;
+			/**
+			 * Thread name
+			 */
+			string name_;
+
+			/**
+			 * Our runnable object, it should be passed in the constructor
+			 */
+			Runnable *target_;
+			/**
+			 * To provide thread safety for all operations in Thread class.
+			 */
+			Mutex lock_;
+			/**
+			 * POSIX Thread handle
+			 */
+			pthread_t threadHandle_;
+			/**
+			 * Thread started once;
+			 */
+			bool started_;
+		protected:
+			/**
+			 * Default constructor.
+			 * Can only be used if you extend Thread to override the run method.
+			 */
+			Thread();
+			/**
+			 * Creates a new Thread and sets its name.
+			 */
+			Thread(string name);
 	};
 }
 #endif /* THREAD_H_ */
