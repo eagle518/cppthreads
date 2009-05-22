@@ -2,6 +2,8 @@
 #define SUPEROBJECT_H_
 
 #include <sys/types.h>
+#include <pthread.h>
+#include <iostream>
 /**
  * Super object is similar to "object" in java that is the parent of any class that you want to put
  * in any of cppThreads containers or to be used in threading, because of the multiple inheritance in C++
@@ -9,12 +11,19 @@
  */
 class SuperObject {
 	public:
-		virtual ~SuperObject() {};
+		virtual ~SuperObject();
 		virtual const char *toString() const{
 			return "SuperObject <Standard>";
 			};
+		void wait();
+		bool wait(uint32_t timeOut);
+		void notify();
+		void notifyAll();
+		
 	protected:
-		SuperObject() {};
+		SuperObject();
+		pthread_cond_t condHandle_;
+		pthread_mutex_t globalMutexHandle_;
 };
 
 #endif /* SUPEROBJECT_H_ */
