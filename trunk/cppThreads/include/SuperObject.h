@@ -3,7 +3,7 @@
 
 #include <sys/types.h>
 #include <pthread.h>
-#include <iostream>
+#include <sstream>
 /**
  * Super object is similar to "object" in java that is the parent of any class that you want to put
  * in any of cppThreads containers or to be used in threading, because of the multiple inheritance in C++
