@@ -13,11 +13,19 @@ SuperObject::SuperObject() {
 }
 
 void SuperObject::wait() {
-	if(pthread_cond_wait(&condHandle_, &globalMutexHandle_) != 0)
+	//We have to explicitly lock the mutex before calling
+	pthread_mutex_lock(&globalMutexHandle_);
+	
+	if(pthread_cond_wait(&condHandle_, &globalMutexHandle_) != 0) {
+		pthread_mutex_unlock(&globalMutexHandle_);
 		throw cppthreads::InterruptedException("Waiting on Object Failed!", errno);
+	}
+
+	pthread_mutex_unlock(&globalMutexHandle_);
 }
 
 bool SuperObject::wait(uint32_t timeOut) {
+	bool returnCode = false;
 	struct timespec timeOutStructure;
 
 	if(clock_gettime(CLOCK_REALTIME, &timeOutStructure) == -1)
@@ -25,16 +33,20 @@ bool SuperObject::wait(uint32_t timeOut) {
 	
 	timeOutStructure.tv_sec += timeOut;
 
+	pthread_mutex_lock(&globalMutexHandle_);
 	int32_t ret = pthread_cond_timedwait(&condHandle_, &globalMutexHandle_, &timeOutStructure);
 	if (ret != 0) {
 		perror("wait():");
-		if (ret == ETIMEDOUT)
-			return false;
-
-		throw cppthreads::InterruptedException("Timed wait on Object Failed!" , errno);
+		if (ret == ETIMEDOUT) {
+			returnCode = true;
+		} else {
+			pthread_mutex_unlock(&globalMutexHandle_); 
+			throw cppthreads::InterruptedException("Timed wait on Object Failed!" , errno);
+		}
 	}
+	pthread_mutex_unlock(&globalMutexHandle_);
 
-	return true;
+	return returnCode;
 }
 
 void SuperObject::notify() {
