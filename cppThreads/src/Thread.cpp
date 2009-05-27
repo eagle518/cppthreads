@@ -17,22 +17,25 @@
 using namespace std;
 
 namespace cppthreads_starter_utils {
-	void * init(void * args) {
-		void ** argsArray= static_cast<void **>(args);
+ extern "C"	void * init(void * args) {
+		void ** argsArray= (void **)(args);
 		cppthreads::Runnable *runnable = static_cast<cppthreads::Runnable *> (argsArray[0]);
 		cppthreads::Thread *thread = static_cast<cppthreads::Thread *>(argsArray[1]);
 		thread->running_ = true;
 		try {
 			runnable->run();
 			thread->running_ = false;
+		 }
+		catch (...) {
+			thread->running_ = false;
+			cout << "Thread::init: Exception was thrown in the thread." <<endl;
+//			throw;
+		}
 			cout << "Thread::init: about to broadcast" << endl;
 			pthread_cond_broadcast( &(thread->threadTerminatedCond_) );
+
+			cout << "Thread::init: thread exiting" << endl;
 			pthread_exit(NULL);
-		} catch (...) {
-			thread->running_ = false;
-			pthread_cond_broadcast( &(thread->threadTerminatedCond_) );
-			throw;
-		}
 	}
 }
 
@@ -51,7 +54,6 @@ namespace cppthreads {
 		init_();
 	}
 	void Thread::init_(){
-		pthread_mutex_init(&condMutex_,NULL);
 		pthread_cond_init(&threadTerminatedCond_,NULL);
 		args_[0] = (void *)target_;
 		args_[1] = (void *)this;
@@ -132,14 +134,22 @@ namespace cppthreads {
 	 * Wait until thread finish execution up to timeout which is expressed in seconds
 	 */
 	void Thread::join(int timeout) {
-		pthread_mutex_lock(&condMutex_);
+			cout << "Thread::b1" << endl;
+		lock_.lock();
+			cout << "Thread::b2" << endl;
+//		pthread_mutex_lock(&condMutex_);
 		struct timespec currentTime;
-		clock_gettime(CLOCK_REALTIME, &currentTime);
+		if (clock_gettime(CLOCK_REALTIME, &currentTime) == -1) {
+			// ERROR
+			std::cerr << "Couldn't get the current time" << std::endl;
+			return;
+		}
 		currentTime.tv_sec += timeout;
-		if(running_){
+		if(started_ && running_){
 			cout << "Thread::Join: about to do timedwait" << endl;
-			int32_t ret = pthread_cond_timedwait(&threadTerminatedCond_,&condMutex_, &currentTime);
+			int32_t ret = pthread_cond_timedwait(&threadTerminatedCond_, &(lock_.getMutexHandle()), &currentTime);
 			cout << "Thread::Join: got back from timedwait" << endl;
+			lock_.unlock();
 			if (ret){
 				switch(errno){
 					case ETIMEDOUT:
@@ -159,10 +169,21 @@ namespace cppthreads {
 						cerr << "ERROR: Unknown Error " << errno << endl;
 
 				}
+//				pthread_mutex_unlock(&condMutex_);
 
 			} else {
+//				pthread_mutex_unlock(&condMutex_);
+				cout << "Will join..." << endl;
 				join();
 			}
+		} else if(started_) {
+			cout << "Thread::Started but" << endl;
+			lock_.unlock();
+			join();
+		} else {
+			cout << "Thread::Join: Thread is not running!" << endl;
+			lock_.unlock();
+
 		}
 	}
 
@@ -196,15 +217,16 @@ namespace cppthreads {
 	}
 
 	bool Thread::isRunning() {
-		return running_;
+		lock_.lock();
+		bool ret = running_;
+		lock_.unlock();
+		return ret;
 	}
 
 	Thread::~Thread() {
-		// TODO Throw exception if we are deleting a running thread
 		cout << "Thread Destructor Deleting :" << target_ << endl;
-		delete target_;
 		pthread_cond_destroy(&threadTerminatedCond_);
-		pthread_mutex_destroy(&condMutex_);
+		delete target_;
 	}
 
 }

@@ -21,6 +21,7 @@ namespace cppthreads {
 			virtual bool lock(uint32_t timeout);
 			virtual bool tryLock();
 			virtual bool isLocked();
+			virtual pthread_mutex_t getMutexHandle();
 			virtual void unlock();
 			virtual bool tryUnlock();
 
