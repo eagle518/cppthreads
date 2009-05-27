@@ -12,33 +12,13 @@
 #include "SuperObject.h"
 #include "Thread.h"
 
-namespace cppthreads_starter_utils {
-
-	/**
-	 *	The starter method used by the pthread lib to call Runnber.run()
-	 */
-	extern "C" void * init(void *);
-
-}
-
 namespace cppthreads {
 
 	class Runnable: public SuperObject {
-		private:
-			/**
-			 * Runnable status
-			 */
-			bool running_;
 		public:
 			virtual void run() = 0;
-			Runnable(): running_(false){
-
-			}
-			virtual ~Runnable(){
-			}
-
-			friend void * cppthreads_starter_utils::init(void *);
-			bool isRunning(){ return running_; }
+			Runnable(){}
+			virtual ~Runnable(){}
 
 	};
 }

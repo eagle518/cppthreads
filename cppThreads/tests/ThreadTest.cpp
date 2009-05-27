@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 #include <sys/types.h>
 #include <vector>
+#include <time.h>
 #include "Thread.h"
 #include "Runnable.h"
 #include "Mutex.h"
@@ -21,6 +22,7 @@ class SynchornizedList : public SuperObject {
 		}
 		void addElement(int32_t value) {
 			lock_.lock();
+			sleep(1);
 			container_->push_back(value);
 			lock_.unlock();
 		}
@@ -44,7 +46,12 @@ class RunnableObject : public Runnable {
 
 		}
 		void run(){
-			elements_->addElement(1);
+			//for (int i =0; i<1000;i++)
+				elements_->addElement(1);
+
+		}
+		~RunnableObject(){
+			cout << "RunnableObject deleting: " << this << endl;
 		}
 	private:
 		SynchornizedList  *elements_;
@@ -52,20 +59,23 @@ class RunnableObject : public Runnable {
 class ThreadTest : public ::testing::Test {
 	protected:
 		SynchornizedList *myList_;
+		Runnable * runnable;
 		Thread *thread1 ;
-		Thread *thread2;
-		Thread *thread3;
+//		Thread *thread2;
+//		Thread *thread3;
 
 		virtual void SetUp(){
 			myList_ = new SynchornizedList();
-			thread1 = new Thread(new RunnableObject(myList_));
-			thread2 = new Thread(new RunnableObject(myList_));
-			thread3 = new Thread(new RunnableObject(myList_));
+			runnable = new RunnableObject(myList_);
+			thread1 = new Thread(runnable);
+		//	thread2 = new Thread(new RunnableObject(myList_));
+			//thread3 = new Thread(new RunnableObject(myList_));
 		}
 		virtual void TearDown(){
 			delete thread1;
-			delete thread2;
-			delete thread3;
+//			delete runnable;
+//			delete thread2;
+//			delete thread3;
 			delete myList_;
 		}
 };
@@ -73,20 +83,23 @@ class ThreadTest : public ::testing::Test {
 TEST_F(ThreadTest, ThreadsRun){
 	ASSERT_FALSE(thread1->isRunning());
 	thread1->start();
-	ASSERT_FALSE(thread2->isRunning());
+/*	ASSERT_FALSE(thread2->isRunning());
 	thread2->start();
 	ASSERT_FALSE(thread3->isRunning());
 	thread3->start();
 	thread1->join();
 	thread2->join();
-	thread3->join();
-	ASSERT_EQ(3, myList_->getSize());
+	thread3->join();*/
+	ASSERT_EQ(3000, myList_->getSize());
 }
 TEST_F(ThreadTest, ThreadsJoinable){
+	cout<<"Starting Thread"<<endl;
 	thread1->start();
-	thread1->join();
+	cout<<"Joining thread"<<endl;
+	thread1->join(100);
+	cout<<"Joining thread"<<endl;
 	ASSERT_FALSE(thread1->isRunning());
-	ASSERT_EQ(1,myList_->getSize());
+	ASSERT_EQ(1, myList_->getSize());
 }
 TEST_F(ThreadTest, ThreadsRestartingFails){
 	thread1->start();
