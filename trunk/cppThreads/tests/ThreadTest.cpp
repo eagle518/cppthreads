@@ -15,6 +15,7 @@
 
 using namespace cppthreads;
 using namespace std;
+
 class SynchornizedList : public SuperObject {
 	public:
 		SynchornizedList() : container_(new vector<int32_t>()) {
@@ -22,7 +23,6 @@ class SynchornizedList : public SuperObject {
 		}
 		void addElement(int32_t value) {
 			lock_.lock();
-			sleep(1);
 			container_->push_back(value);
 			lock_.unlock();
 		}
@@ -40,14 +40,18 @@ class SynchornizedList : public SuperObject {
 		Mutex lock_;
 		vector<int32_t> *container_;
 };
+
 class RunnableObject : public Runnable {
 	public:
 		RunnableObject(SynchornizedList *myList) : elements_(myList) {
 
 		}
 		void run(){
-			//for (int i =0; i<1000;i++)
-				elements_->addElement(1);
+			for (int i =0; i<100;i++) {
+//				cout << "Adding Element " << i + 1 << endl;
+				elements_->addElement(i);
+//				usleep(100);
+			}
 
 		}
 		~RunnableObject(){
@@ -56,53 +60,142 @@ class RunnableObject : public Runnable {
 	private:
 		SynchornizedList  *elements_;
 };
-class ThreadTest : public ::testing::Test {
-	protected:
-		SynchornizedList *myList_;
-		Runnable * runnable;
-		Thread *thread1 ;
-//		Thread *thread2;
-//		Thread *thread3;
 
-		virtual void SetUp(){
-			myList_ = new SynchornizedList();
-			runnable = new RunnableObject(myList_);
-			thread1 = new Thread(runnable);
-		//	thread2 = new Thread(new RunnableObject(myList_));
-			//thread3 = new Thread(new RunnableObject(myList_));
-		}
-		virtual void TearDown(){
-			delete thread1;
-//			delete runnable;
-//			delete thread2;
-//			delete thread3;
-			delete myList_;
-		}
-};
+TEST(ThreadTest, ThreadsRun){
+	SynchornizedList *myList_;
+	Runnable * runnable;
+	Thread *thread1 ;
+	Thread *thread2;
+	Thread *thread3;
 
-TEST_F(ThreadTest, ThreadsRun){
+	myList_ = new SynchornizedList();
+	thread1 = new Thread(new RunnableObject(myList_));
+	thread2 = new Thread(new RunnableObject(myList_));
+	thread3 = new Thread(new RunnableObject(myList_));
+
 	ASSERT_FALSE(thread1->isRunning());
 	thread1->start();
-/*	ASSERT_FALSE(thread2->isRunning());
+	ASSERT_FALSE(thread2->isRunning());
 	thread2->start();
 	ASSERT_FALSE(thread3->isRunning());
 	thread3->start();
+	cout  << "Joining Threads..." << endl;
 	thread1->join();
 	thread2->join();
-	thread3->join();*/
-	ASSERT_EQ(3000, myList_->getSize());
+	thread3->join();
+	ASSERT_EQ(300, myList_->getSize());
+
+	delete thread1;
+	delete thread2;
+	delete thread3;
+	delete myList_;
+
 }
-TEST_F(ThreadTest, ThreadsJoinable){
-	cout<<"Starting Thread"<<endl;
+TEST(ThreadTest, ThreadsJoinable){
+	SynchornizedList *myList_;
+	Runnable * runnable;
+	Thread *thread1 ;
+
+	myList_ = new SynchornizedList();
+	thread1 = new Thread(new RunnableObject(myList_));
+
+	cout << "Starting Thread" << endl;
 	thread1->start();
-	cout<<"Joining thread"<<endl;
-	thread1->join(100);
-	cout<<"Joining thread"<<endl;
+	cout << "Joining thread1" << endl;
+	thread1->join(3);
+	cout << "Joining thread2" << endl;
 	ASSERT_FALSE(thread1->isRunning());
-	ASSERT_EQ(1, myList_->getSize());
+	ASSERT_EQ(100, myList_->getSize());
+
+	delete thread1;
+	delete myList_;
+
 }
-TEST_F(ThreadTest, ThreadsRestartingFails){
+
+TEST(ThreadTest, ThreadsJoinable2){
+	SynchornizedList *myList_;
+	Runnable * runnable;
+	Thread *thread1 ;
+
+	myList_ = new SynchornizedList();
+	thread1 = new Thread(new RunnableObject(myList_));
+
+	cout << "Starting Thread" << endl;
+	thread1->start();
+	cout << "Joining thread1" << endl;
+	// will make sure that you have the thread started already..
+	usleep(10);
+	thread1->join(3);
+	cout << "Joining thread2" << endl;
+	ASSERT_FALSE(thread1->isRunning());
+	ASSERT_EQ(100, myList_->getSize());
+
+	delete thread1;
+	delete myList_;
+
+}
+
+TEST(ThreadTest, ThreadsJoinable3){
+	SynchornizedList *myList_;
+	Runnable * runnable;
+	Thread *thread1 ;
+
+	myList_ = new SynchornizedList();
+	thread1 = new Thread(new RunnableObject(myList_));
+
+	cout << "Starting Thread" << endl;
+	cout << "Joining thread1" << endl;
+	thread1->join(3);
+	thread1->start();
+	cout << "Joining thread2" << endl;
+	thread1->join();
+	ASSERT_EQ(100, myList_->getSize());
+
+	delete thread1;
+	delete myList_;
+
+}
+
+TEST(ThreadTest, ThreadsJoinable1){
+	SynchornizedList *myList_;
+	Runnable * runnable;
+	Thread *thread1 ;
+
+	myList_ = new SynchornizedList();
+	thread1 = new Thread(new RunnableObject(myList_));
+
+	cout << "Starting Thread" << endl;
+	thread1->start();
+	usleep(2000);
+	cout << "Joining thread1" << endl;
+	thread1->join(3);
+	cout << "Joining thread2" << endl;
+	ASSERT_FALSE(thread1->isRunning());
+	ASSERT_EQ(100, myList_->getSize());
+
+	delete thread1;
+	delete myList_;
+
+}
+TEST(ThreadTest, ThreadsRestartingFails){
+	SynchornizedList *myList_;
+	Runnable * runnable;
+	Thread *thread1 ;
+	Thread *thread2;
+	Thread *thread3;
+
+	myList_ = new SynchornizedList();
+	thread1 = new Thread(new RunnableObject(myList_));
+	thread2 = new Thread(new RunnableObject(myList_));
+	thread3 = new Thread(new RunnableObject(myList_));
+
 	thread1->start();
 	thread1->join();
 	ASSERT_THROW(thread1->start(), ThreadAlreadyStartedException);
+
+	delete thread1;
+	delete thread2;
+	delete thread3;
+	delete myList_;
+
 }

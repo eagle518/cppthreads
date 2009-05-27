@@ -113,10 +113,6 @@ namespace cppthreads {
 			 */
 			pthread_cond_t threadTerminatedCond_;
 			/**
-			 * To be used in timed join
-			 */
-			pthread_mutex_t condMutex_;
-			/**
 			 * To be used in timed join as well
 			 */
 

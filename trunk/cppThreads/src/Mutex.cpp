@@ -55,6 +55,11 @@ namespace cppthreads {
 	bool Mutex::isLocked() {
 		return locked_;
 	}
+
+	pthread_mutex_t Mutex::getMutexHandle() {
+		return mutexHandle_;
+	}
+
 	bool Mutex::tryLock() {
 		if (pthread_mutex_trylock(&mutexHandle_) == 0) {
 			locked_ = true;
