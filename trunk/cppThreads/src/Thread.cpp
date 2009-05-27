@@ -17,16 +17,20 @@
 using namespace std;
 
 namespace cppthreads_starter_utils {
-	void * init(void * runnable) {
-		cppthreads::Runnable *thread =
-				static_cast<cppthreads::Runnable *> (runnable);
+	void * init(void * args) {
+		void ** argsArray= static_cast<void **>(args);
+		cppthreads::Runnable *runnable = static_cast<cppthreads::Runnable *> (argsArray[0]);
+		cppthreads::Thread *thread = static_cast<cppthreads::Thread *>(argsArray[1]);
 		thread->running_ = true;
 		try {
-			thread->run();
+			runnable->run();
 			thread->running_ = false;
+			cout << "Thread::init: about to broadcast" << endl;
+			pthread_cond_broadcast( &(thread->threadTerminatedCond_) );
 			pthread_exit(NULL);
 		} catch (...) {
 			thread->running_ = false;
+			pthread_cond_broadcast( &(thread->threadTerminatedCond_) );
 			throw;
 		}
 	}
@@ -34,10 +38,24 @@ namespace cppthreads_starter_utils {
 
 namespace cppthreads {
 
-	Thread::Thread() : started_(false),target_(this){}
-	Thread::Thread(string name) : started_(false),name_(name), target_(this){}
-	Thread::Thread(Runnable *target) : started_(false),target_(target) {}
-	Thread::Thread(Runnable *target, string name) : started_(false),target_(target), name_(name){}
+	Thread::Thread() : started_(false),target_(this), running_(false){
+		init_();
+	}
+	Thread::Thread(string name) : started_(false),name_(name), target_(this), running_(false){
+		init_();
+	}
+	Thread::Thread(Runnable *target) : started_(false),target_(target), running_(false) {
+		init_();
+	}
+	Thread::Thread(Runnable *target, string name) : started_(false),target_(target), name_(name), running_(false){
+		init_();
+	}
+	void Thread::init_(){
+		pthread_mutex_init(&condMutex_,NULL);
+		pthread_cond_init(&threadTerminatedCond_,NULL);
+		args_[0] = (void *)target_;
+		args_[1] = (void *)this;
+	}
 
 	void Thread::start() {
 		lock_.lock();
@@ -46,8 +64,9 @@ namespace cppthreads {
 			throw ThreadAlreadyStartedException("Thread already started, can't run thread twice.",-1);
 		}
 		started_ = true;
+		cout << "Thread Starting : " << target_ << endl;
 		int32_t extCode = pthread_create(&threadHandle_, NULL,
-								cppthreads_starter_utils::init, (void *) target_);
+								cppthreads_starter_utils::init, (void *)args_);
 		lock_.unlock();
 		if (extCode) {
 			switch (errno) {
@@ -80,8 +99,8 @@ namespace cppthreads {
 	/**
 	 * Puts thread to sleep for "millis" seconds
 	 */
-	void Thread::sleep(int millis) {
-
+	void Thread::sleep(int seconds) {
+		usleep(seconds* 1000);
 	}
 	/**
 	 * Wait until this thread finish execution.
@@ -110,9 +129,41 @@ namespace cppthreads {
 		}
 	}
 	/**
-	 * Wait until thread finish execution up to timeout which is expressed in millis
+	 * Wait until thread finish execution up to timeout which is expressed in seconds
 	 */
 	void Thread::join(int timeout) {
+		pthread_mutex_lock(&condMutex_);
+		struct timespec currentTime;
+		clock_gettime(CLOCK_REALTIME, &currentTime);
+		currentTime.tv_sec += timeout;
+		if(running_){
+			cout << "Thread::Join: about to do timedwait" << endl;
+			int32_t ret = pthread_cond_timedwait(&threadTerminatedCond_,&condMutex_, &currentTime);
+			cout << "Thread::Join: got back from timedwait" << endl;
+			if (ret){
+				switch(errno){
+					case ETIMEDOUT:
+						cerr << "ERROR: Timedout" << endl;
+						//TODO:throw
+						;
+					case EINVAL:
+						cerr << "ERROR: EInvalid" << endl;
+						//TODO:throw
+						;
+					case EPERM:
+						cerr << "ERROR: Permission Denied" << endl;
+
+						//TODO:throw
+						;
+					default:
+						cerr << "ERROR: Unknown Error " << errno << endl;
+
+				}
+
+			} else {
+				join();
+			}
+		}
 	}
 
 	void Thread::yield(){
@@ -145,12 +196,15 @@ namespace cppthreads {
 	}
 
 	bool Thread::isRunning() {
-		return target_->isRunning();
+		return running_;
 	}
 
 	Thread::~Thread() {
 		// TODO Throw exception if we are deleting a running thread
+		cout << "Thread Destructor Deleting :" << target_ << endl;
 		delete target_;
+		pthread_cond_destroy(&threadTerminatedCond_);
+		pthread_mutex_destroy(&condMutex_);
 	}
 
 }

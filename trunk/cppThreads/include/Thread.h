@@ -14,7 +14,17 @@
 #include "Mutex.h"
 #include <string>
 #include <sys/types.h>
+#include <time.h>
 using namespace std;
+
+namespace cppthreads_starter_utils {
+
+	/**
+	 *	The starter method used by the pthread lib to call Runnber.run()
+	 */
+	extern "C" void * init(void *);
+
+}
 
 namespace cppthreads {
 	class Thread: public Runnable {
@@ -97,6 +107,19 @@ namespace cppthreads {
 			 * To provide thread safety for all operations in Thread class.
 			 */
 			Mutex lock_;
+
+			/**
+			 * To be used in timed join to unblock when a thread finishes
+			 */
+			pthread_cond_t threadTerminatedCond_;
+			/**
+			 * To be used in timed join
+			 */
+			pthread_mutex_t condMutex_;
+			/**
+			 * To be used in timed join as well
+			 */
+
 			/**
 			 * POSIX Thread handle
 			 */
@@ -105,6 +128,22 @@ namespace cppthreads {
 			 * Thread started once;
 			 */
 			bool started_;
+			/**
+			 * initiaizer method
+			 */
+			void init_();
+			/**
+			 * args array to be sent to init
+			 * args[0] : Runnable target
+			 * args[1] : "this" pointer
+			 */
+			void * args_[2];
+			/**
+			 * Runnable status
+			 */
+			bool running_;
+
+			friend void * cppthreads_starter_utils::init(void *);
 		protected:
 			/**
 			 * Default constructor.
