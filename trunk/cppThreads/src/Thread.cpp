@@ -17,10 +17,10 @@
 using namespace std;
 
 namespace cppthreads_starter_utils {
- extern "C"	void * init(void * args) {
-		void ** argsArray= (void **)(args);
+	extern "C"	void * init(void * args) {
+		void ** argsArray = (void **)(args);
 		cppthreads::Runnable *runnable = static_cast<cppthreads::Runnable *> (argsArray[0]);
-		cppthreads::Thread *thread = static_cast<cppthreads::Thread *>(argsArray[1]);
+		cppthreads::Thread *thread = static_cast<cppthreads::Thread *> (argsArray[1]);
 		thread->running_ = true;
 		try {
 			runnable->run();
@@ -28,33 +28,36 @@ namespace cppthreads_starter_utils {
 		 }
 		catch (...) {
 			thread->running_ = false;
-			cout << "Thread::init: Exception was thrown in the thread." <<endl;
-//			throw;
 		}
-			cout << "Thread::init: about to broadcast" << endl;
 			pthread_cond_broadcast( &(thread->threadTerminatedCond_) );
-
-			cout << "Thread::init: thread exiting" << endl;
 			pthread_exit(NULL);
 	}
 }
 
 namespace cppthreads {
 
-	Thread::Thread() : started_(false),target_(this), running_(false){
+	Thread::Thread() :
+		started_(false), target_(this), running_(false) {
 		init_();
 	}
-	Thread::Thread(string name) : started_(false),name_(name), target_(this), running_(false){
+
+	Thread::Thread(string name) :
+		started_(false), name_(name), target_(this), running_(false) {
 		init_();
 	}
-	Thread::Thread(Runnable *target) : started_(false),target_(target), running_(false) {
+
+	Thread::Thread(Runnable *target) :
+		started_(false), target_(target), running_(false) {
 		init_();
 	}
-	Thread::Thread(Runnable *target, string name) : started_(false),target_(target), name_(name), running_(false){
+
+	Thread::Thread(Runnable *target, string name) :
+		started_(false),target_(target), name_(name), running_(false) {
 		init_();
 	}
-	void Thread::init_(){
-		pthread_cond_init(&threadTerminatedCond_,NULL);
+
+	void Thread::init_() {
+		pthread_cond_init(&threadTerminatedCond_, NULL);
 		args_[0] = (void *)target_;
 		args_[1] = (void *)this;
 	}
@@ -63,10 +66,9 @@ namespace cppthreads {
 		lock_.lock();
 		if (started_){
 			lock_.unlock();
-			throw ThreadAlreadyStartedException("Thread already started, can't run thread twice.",-1);
+			throw ThreadAlreadyStartedException("Thread already started, can't run thread twice.", -1);
 		}
 		started_ = true;
-		cout << "Thread Starting : " << target_ << endl;
 		int32_t extCode = pthread_create(&threadHandle_, NULL,
 								cppthreads_starter_utils::init, (void *)args_);
 		lock_.unlock();
@@ -91,23 +93,15 @@ namespace cppthreads {
 			}
 		}
 	}
-	/**
-	 * The entry method of the new thread. This method will run in a new thread
-	 * Override this method and put the code which you want to run in a new thread inside.
-	 */
+
 	void Thread::run() {
 
 	}
-	/**
-	 * Puts thread to sleep for "millis" seconds
-	 */
-	void Thread::sleep(int seconds) {
-		usleep(seconds* 1000);
+
+	void Thread::sleep(int millis) {
+		usleep(millis* 1000);
 	}
-	/**
-	 * Wait until this thread finish execution.
-	 * Thread calling this join() will block until this Thread finishes execution
-	 */
+
 	void Thread::join() {
 		lock_.lock();
 		int32_t extCode = pthread_join(threadHandle_, &returnResult_);
@@ -115,83 +109,74 @@ namespace cppthreads {
 		if (extCode) {
 			switch (errno){
 				case EINVAL:
-					throw ThreadJoiningFailedException("Thread is not a joinable thread.",errno);
+					throw ThreadJoiningFailedException("Thread is not a joinable thread.", errno);
 				case ESRCH:
-					throw ThreadJoiningFailedException("Can't find thread to join",errno);
+					throw ThreadJoiningFailedException("Can't find thread to join", errno);
 				case EDEADLK:
-					throw PossibleThreadDeadLockException("Dead lock detected",errno);
+					throw PossibleThreadDeadLockException("Dead lock detected", errno);
 				default :
-					throw ThreadJoiningFailedException("Unknown error occured",errno);
+					throw ThreadJoiningFailedException("Unknown error occured", errno);
 			}
 		}
 		else {
 			if ((returnResult_)!= NULL){
-				throw JoinedThreadAbnormalExitException("Joined thread exited abnormally",-1);
+				throw JoinedThreadAbnormalExitException("Joined thread exited abnormally", -1);
 			}
 		}
 	}
-	/**
-	 * Wait until thread finish execution up to timeout which is expressed in seconds
-	 */
+
 	void Thread::join(int timeout) {
-			cout << "Thread::b1" << endl;
 		lock_.lock();
-			cout << "Thread::b2" << endl;
-//		pthread_mutex_lock(&condMutex_);
 		struct timespec currentTime;
 		if (clock_gettime(CLOCK_REALTIME, &currentTime) == -1) {
-			// ERROR
-			std::cerr << "Couldn't get the current time" << std::endl;
+			lock_.unlock();
+			throw ThreadJoiningFailedException("Cannot retrieve current time", -1);
 			return;
 		}
 		currentTime.tv_sec += timeout;
 		if(started_ && running_){
-			cout << "Thread::Join: about to do timedwait" << endl;
 			int32_t ret = pthread_cond_timedwait(&threadTerminatedCond_, &(lock_.getMutexHandle()), &currentTime);
-			cout << "Thread::Join: got back from timedwait" << endl;
 			lock_.unlock();
 			if (ret){
 				switch(errno){
 					case ETIMEDOUT:
-						cerr << "ERROR: Timedout" << endl;
-						//TODO:throw
-						;
+						throw ThreadJoiningFailedException(
+								"Timeout Error: The time you specified already passed",
+								errno);
 					case EINVAL:
-						cerr << "ERROR: EInvalid" << endl;
-						//TODO:throw
-						;
+						throw ThreadJoiningFailedException(
+								"Invalid mutix, condition or time",
+								errno);
 					case EPERM:
-						cerr << "ERROR: Permission Denied" << endl;
-
-						//TODO:throw
-						;
+						throw ThreadJoiningFailedException(
+								"Invalid mutix: Mutix is not owned by current thread",
+								errno);
 					default:
-						cerr << "ERROR: Unknown Error " << errno << endl;
-
+						throw ThreadJoiningFailedException(
+								"Unknow error occured",
+								errno);
 				}
-//				pthread_mutex_unlock(&condMutex_);
 
 			} else {
-//				pthread_mutex_unlock(&condMutex_);
-				cout << "Will join..." << endl;
 				join();
 			}
 		} else if(started_) {
-			cout << "Thread::Started but" << endl;
 			lock_.unlock();
 			join();
 		} else {
+			//TODO: Check what should happen
 			cout << "Thread::Join: Thread is not running!" << endl;
 			lock_.unlock();
 
 		}
 	}
 
-	void Thread::yield(){
+	void Thread::yield() {
 		lock_.lock();
 		pthread_yield();
 		lock_.unlock();
 	}
+
 	int Thread::getPriority() const {
 		return priority_;
 	}
@@ -224,7 +209,6 @@ namespace cppthreads {
 	}
 
 	Thread::~Thread() {
-		cout << "Thread Destructor Deleting :" << target_ << endl;
 		pthread_cond_destroy(&threadTerminatedCond_);
 		delete target_;
 	}
