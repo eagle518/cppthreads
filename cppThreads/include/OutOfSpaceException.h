@@ -14,7 +14,7 @@ namespace cppthreads {
 		public:
 			OutOfSpaceException(const char *message, int32_t errorCode) : ThreadingException(message, errorCode) {
 			}
-			virtual ~OutOfSpaceException(){};
+			virtual ~OutOfSpaceException() throw(){};
 	};
 }
 

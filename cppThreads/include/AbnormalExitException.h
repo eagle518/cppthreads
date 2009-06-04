@@ -11,12 +11,12 @@
 #include<sys/types.h>
 
 namespace cppthreads {
-	class JoinedThreadAbnormalExitException: public ThreadingException {
+	class AbnormalExitException: public ThreadingException {
 		public:
-			JoinedThreadAbnormalExitException(const char *msg, int32_t errorCode) : ThreadingException(msg,errorCode){
+			AbnormalExitException(const char *msg, int32_t errorCode) : ThreadingException(msg,errorCode){
 
 			}
-			virtual ~JoinedThreadAbnormalExitException(){
+			virtual ~AbnormalExitException() throw(){
 
 			}
 	};

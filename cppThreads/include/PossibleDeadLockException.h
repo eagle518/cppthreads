@@ -11,12 +11,12 @@
 #include<sys/types.h>
 
 namespace cppthreads {
-	class PossibleThreadDeadLockException: public ThreadingException {
+	class PossibleDeadLockException: public ThreadingException {
 		public:
-			PossibleThreadDeadLockException(const char *msg, int32_t errorCode) : ThreadingException(msg,errorCode){
+			PossibleDeadLockException(const char *msg, int32_t errorCode) : ThreadingException(msg,errorCode){
 
 			}
-			virtual ~PossibleThreadDeadLockException(){
+			virtual ~PossibleDeadLockException() throw(){
 
 			}
 	};

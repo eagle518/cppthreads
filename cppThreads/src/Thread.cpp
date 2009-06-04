@@ -8,11 +8,12 @@
 #include <pthread.h>
 #include <errno.h>
 #include "Thread.h"
-#include "ThreadCreationFailedException.h"
-#include "ThreadAlreadyStartedException.h"
-#include "JoinedThreadAbnormalExitException.h"
-#include "ThreadJoiningFailedException.h"
-#include "PossibleThreadDeadLockException.h"
+#include "CreationFailedException.h"
+#include "AlreadyStartedException.h"
+#include "AbnormalExitException.h"
+#include "JoinFailedException.h"
+#include "TimeOutException.h"
+#include "PossibleDeadLockException.h"
 
 using namespace std;
 
@@ -66,7 +67,7 @@ namespace cppthreads {
 		lock_.lock();
 		if (started_){
 			lock_.unlock();
-			throw ThreadAlreadyStartedException("Thread already started, can't run thread twice.", -1);
+			throw AlreadyStartedException("Thread already started, can't run thread twice.", -1);
 		}
 		started_ = true;
 		int32_t extCode = pthread_create(&threadHandle_, NULL,
@@ -75,19 +76,19 @@ namespace cppthreads {
 		if (extCode) {
 			switch (errno) {
 				case EAGAIN:
-					throw ThreadCreationFailedException(
+					throw CreationFailedException(
 							"Thread creation failed due to lack of resources or due to some system limits",
 							errno);
 				case EINVAL:
-					throw ThreadCreationFailedException(
+					throw CreationFailedException(
 							"Thread creation failed due to invalid attributes",
 							errno);
 				case EPERM:
-					throw ThreadCreationFailedException(
+					throw CreationFailedException(
 							"You don't have enough permissions to set the required scheduling parameters or policy",
 							errno);
 				default: {
-					throw ThreadCreationFailedException(
+					throw CreationFailedException(
 							"Unknown error occurred", errno);
 				}
 			}
@@ -104,24 +105,29 @@ namespace cppthreads {
 
 	void Thread::join() {
 		lock_.lock();
-		int32_t extCode = pthread_join(threadHandle_, &returnResult_);
-		lock_.unlock();
-		if (extCode) {
-			switch (errno){
-				case EINVAL:
-					throw ThreadJoiningFailedException("Thread is not a joinable thread.", errno);
-				case ESRCH:
-					throw ThreadJoiningFailedException("Can't find thread to join", errno);
-				case EDEADLK:
-					throw PossibleThreadDeadLockException("Dead lock detected", errno);
-				default :
-					throw ThreadJoiningFailedException("Unknown error occured", errno);
+		if (started_){
+			int32_t extCode = pthread_join(threadHandle_, &returnResult_);
+			lock_.unlock();
+			if (extCode) {
+				switch (errno){
+					case EINVAL:
+						throw JoinFailedException("Thread is not a joinable thread.", errno);
+					case ESRCH:
+						throw JoinFailedException("Can't find thread to join", errno);
+					case EDEADLK:
+						throw PossibleDeadLockException("Dead lock detected", errno);
+					default :
+						throw JoinFailedException("Unknown error occured", errno);
+				}
+			}
+			else {
+				if ((returnResult_)!= NULL){
+					throw AbnormalExitException("Joined thread exited abnormally", -1);
+				}
 			}
 		}
-		else {
-			if ((returnResult_)!= NULL){
-				throw JoinedThreadAbnormalExitException("Joined thread exited abnormally", -1);
-			}
+		else{
+			lock_.unlock();
 		}
 	}
 
@@ -130,31 +136,33 @@ namespace cppthreads {
 		struct timespec currentTime;
 		if (clock_gettime(CLOCK_REALTIME, &currentTime) == -1) {
 			lock_.unlock();
-			throw ThreadJoiningFailedException("Cannot retrieve current time", -1);
+			throw JoinFailedException("Cannot retrieve current time", -1);
 			return;
 		}
 		currentTime.tv_sec += timeout;
 		if(started_ && running_){
-			int32_t ret = pthread_cond_timedwait(&threadTerminatedCond_, &(lock_.getMutexHandle()), &currentTime);
+			int32_t extCode = pthread_cond_timedwait(&threadTerminatedCond_, &(lock_.getMutexHandle()), &currentTime);
 			lock_.unlock();
-			if (ret){
-				switch(errno){
-					case ETIMEDOUT:
-						throw ThreadJoiningFailedException(
-								"Timeout Error: The time you specified already passed",
-								errno);
-					case EINVAL:
-						throw ThreadJoiningFailedException(
-								"Invalid mutix, condition or time",
-								errno);
-					case EPERM:
-						throw ThreadJoiningFailedException(
-								"Invalid mutix: Mutix is not owned by current thread",
-								errno);
-					default:
-						throw ThreadJoiningFailedException(
-								"Unknow error occured",
-								errno);
+			if (extCode){
+				if (extCode == ETIMEDOUT){
+					// timedwait timed out
+					throw TimeOutException( "Timeout : Join timed out",	extCode);
+				}
+				else{
+					switch(errno){
+						case EINVAL:
+							throw JoinFailedException(
+									"Invalid mutix, condition or time",
+									errno);
+						case EPERM:
+							throw JoinFailedException(
+									"Invalid mutix: Mutix is not owned by current thread",
+									errno);
+						default:
+							throw JoinFailedException(
+									"Unknow error occured",
+									extCode);
+					}
 				}
 
 			} else {
@@ -164,10 +172,8 @@ namespace cppthreads {
 			lock_.unlock();
 			join();
 		} else {
-			//TODO: Check what should happen
-			cout << "Thread::Join: Thread is not running!" << endl;
+			//Thread is not started, will unlock only
 			lock_.unlock();
-
 		}
 	}
 
