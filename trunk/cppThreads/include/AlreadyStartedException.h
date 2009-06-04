@@ -11,12 +11,12 @@
 #include "ThreadingException.h"
 
 namespace cppthreads{
-	class ThreadAlreadyStartedException : public ThreadingException {
+	class AlreadyStartedException : public ThreadingException {
 		public:
-			ThreadAlreadyStartedException(const char *msg, int32_t errorCode) : ThreadingException(msg,errorCode){
+			AlreadyStartedException(const char *msg, int32_t errorCode) : ThreadingException(msg,errorCode){
 
 			}
-			virtual ~ThreadAlreadyStartedException(){
+			virtual ~AlreadyStartedException() throw(){
 
 			}
 	};

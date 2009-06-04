@@ -14,7 +14,7 @@ namespace cppthreads {
 		public:
 			InterruptedException(const char *message, int32_t errorCode) : ThreadingException(message, errorCode) {
 			}
-			virtual ~InterruptedException(){};
+			virtual ~InterruptedException() throw(){};
 	};
 }
 

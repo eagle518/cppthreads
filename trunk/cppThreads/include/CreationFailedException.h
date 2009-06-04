@@ -11,14 +11,14 @@
 #include "ThreadingException.h"
 #include <sys/types.h>
 namespace cppthreads {
-	class ThreadCreationFailedException: public ThreadingException {
+	class CreationFailedException: public ThreadingException {
 		private:
 
 		public:
-			ThreadCreationFailedException(const char *message, int32_t errCode) : ThreadingException(message,errCode){
+			CreationFailedException(const char *message, int32_t errCode) : ThreadingException(message,errCode){
 
 			}
-			virtual ~ThreadCreationFailedException(){
+			virtual ~CreationFailedException() throw(){
 
 			}
 
