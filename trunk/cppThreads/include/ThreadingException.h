@@ -18,11 +18,7 @@ namespace cppthreads {
 	class ThreadingException : public SuperObject , public std::exception{
 		public:
 			ThreadingException(const char *message, int32_t errorCode) : message_(message), errorCode_(errorCode) {
-				if (errorCode != NULL){
-					formattedMsg_ << message << "\nErrorCode: " << errorCode << endl;
-				}
-				else
-					formattedMsg_ << message;
+				formattedMsg_ << message << "\nErrorCode: " << errorCode << endl;
 			}
 
 			ThreadingException(const ThreadingException & exception){

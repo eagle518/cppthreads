@@ -14,6 +14,7 @@
 #include "JoinFailedException.h"
 #include "TimeOutException.h"
 #include "PossibleDeadLockException.h"
+#include "DetachException.h"
 
 using namespace std;
 
@@ -24,7 +25,19 @@ namespace cppthreads_starter_utils {
 		cppthreads::Thread *thread = static_cast<cppthreads::Thread *> (argsArray[1]);
 		thread->running_ = true;
 		try {
-			runnable->run();
+			// set thread's cancel state
+			pthread_setcancelstate(thread->cancelable_, NULL);
+			pthread_setcanceltype(thread->cancelType_, NULL);
+			if (thread->cleanupHandler_ != NULL){
+				// cleanup method
+				pthread_cleanup_push(thread->cleanupHandler_, thread->cleanupArgs_);
+				runnable->run();
+				pthread_cleanup_pop(0);
+			}
+			else{
+				runnable->run();
+			}
+
 			thread->running_ = false;
 		 }
 		catch (...) {
@@ -37,30 +50,38 @@ namespace cppthreads_starter_utils {
 
 namespace cppthreads {
 
-	Thread::Thread() :
-		started_(false), target_(this), running_(false) {
-		init_();
+	Thread::Thread(bool cancelable, CANCELATION_TYPE cancelType, bool detached) {
+		init_(this, cancelable, cancelType, detached);
 	}
 
-	Thread::Thread(string name) :
-		started_(false), name_(name), target_(this), running_(false) {
-		init_();
+	Thread::Thread(string name, bool cancelable, CANCELATION_TYPE cancelType, bool detached) : name_(name) {
+		init_(this, cancelable, cancelType, detached);
 	}
 
-	Thread::Thread(Runnable *target) :
-		started_(false), target_(target), running_(false) {
-		init_();
+	Thread::Thread(Runnable *target, bool cancelable, CANCELATION_TYPE cancelType, bool detached) {
+		init_(target, cancelable, cancelType, detached);
 	}
 
-	Thread::Thread(Runnable *target, string name) :
-		started_(false),target_(target), name_(name), running_(false) {
-		init_();
+	Thread::Thread(string name, Runnable *target, bool cancelable, CANCELATION_TYPE cancelType, bool detached) : name_(name){
+		init_(target, cancelable, cancelType, detached);
 	}
 
-	void Thread::init_() {
+	void Thread::init_(Runnable *target, bool cancelable, CANCELATION_TYPE cancelType, bool detached) {
+		started_ = false;
+		running_ = false;
+		cleanupHandler_ = NULL;
+		cleanupArgs_ = NULL;
+		target_ = target;
+		cancelable_ = cancelable;
+		cancelType_ = cancelType;
+		detached_ = detached;
+
+		pthread_attr_init(&threadAttr_);
 		pthread_cond_init(&threadTerminatedCond_, NULL);
 		args_[0] = (void *)target_;
 		args_[1] = (void *)this;
+		pthread_attr_setdetachstate(&threadAttr_, detached ? PTHREAD_CREATE_DETACHED : PTHREAD_CREATE_JOINABLE);
+
 	}
 
 	void Thread::start() {
@@ -70,7 +91,7 @@ namespace cppthreads {
 			throw AlreadyStartedException("Thread already started, can't run thread twice.", -1);
 		}
 		started_ = true;
-		int32_t extCode = pthread_create(&threadHandle_, NULL,
+		int32_t extCode = pthread_create(&threadHandle_, &threadAttr_,
 								cppthreads_starter_utils::init, (void *)args_);
 		lock_.unlock();
 		if (extCode) {
@@ -105,6 +126,10 @@ namespace cppthreads {
 
 	void Thread::join() {
 		lock_.lock();
+		if (detached_){
+			lock_.unlock();
+			throw JoinFailedException("Can't join a detached thread",-1);
+		}
 		if (started_){
 			int32_t extCode = pthread_join(threadHandle_, &returnResult_);
 			lock_.unlock();
@@ -133,6 +158,10 @@ namespace cppthreads {
 
 	void Thread::join(int timeout) {
 		lock_.lock();
+		if (detached_){
+			lock_.unlock();
+			throw JoinFailedException("Can't join a detached thread",-1);
+		}
 		struct timespec currentTime;
 		if (clock_gettime(CLOCK_REALTIME, &currentTime) == -1) {
 			lock_.unlock();
@@ -177,6 +206,26 @@ namespace cppthreads {
 		}
 	}
 
+	void Thread::cancel(){
+		pthread_cancel(threadHandle_);
+		//maybe do some error handling
+	}
+
+	void Thread::kill(){
+
+	}
+
+	void Thread::detach(){
+		lock_.lock();
+		if (detached_){
+			lock_.unlock();
+			throw DetachException("Thread is already detached", -1);
+		}
+		pthread_detach(threadHandle_);
+		detached_ = true;
+		lock_.unlock();
+	}
+
 	void Thread::yield() {
 		lock_.lock();
 		pthread_yield();
@@ -193,8 +242,22 @@ namespace cppthreads {
 		lock_.unlock();
 	}
 
+//	void Thread::setCancelationType(CANCELATION_TYPE type){
+//		cancelType_ = type;
+//		pthread_setcanceltype(type);
+//	}
+
 	int Thread::getId() const {
 		return id_;
+	}
+
+	CANCELATION_TYPE Thread::getCancellationType(){
+		return cancelType_;
+	}
+
+	void Thread::setCleanupHandler(void (*cleanupHandler)(void *), void *args){
+		cleanupHandler_ = cleanupHandler;
+		cleanupArgs_ = args;
 	}
 
 	string Thread::getName() const {

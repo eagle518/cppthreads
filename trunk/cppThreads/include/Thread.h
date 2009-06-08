@@ -27,17 +27,20 @@ namespace cppthreads_starter_utils {
 }
 
 namespace cppthreads {
+
+	enum CANCELATION_TYPE {CANCEL_ASYNCHRONOUS=PTHREAD_CANCEL_ASYNCHRONOUS, CANCEL_DEFERRED=PTHREAD_CANCEL_DEFERRED};
+
 	class Thread: public Runnable {
 		public:
 			/**
 			 * Creates a new Thread object that'll call target's run method in a new execution thread
 			 */
-			Thread(Runnable *target);
+			Thread(Runnable *target, bool cancelability=true, CANCELATION_TYPE cancelType=CANCEL_ASYNCHRONOUS, bool detached=false);
 
 			/**
 			 * Creates a new Thread object with name that'll call target's run method in a new execution thread
 			 */
-			Thread(Runnable *target, string name);
+			Thread(string name, Runnable *target, bool cancelability=true, CANCELATION_TYPE cancelType=CANCEL_ASYNCHRONOUS, bool detached=false);
 
 			/**
 			 * Destructor
@@ -72,6 +75,22 @@ namespace cppthreads {
 			void join(int timeout);
 
 			/**
+			 * Cancel thread
+			 */
+			void cancel();
+
+			/**
+			 * Send signal to thread
+			 */
+			void kill();
+
+			/**
+			 * Detach thread, making it not joinable
+			 * A detached thread's storage will be reclaimed by the implementation once it finishes execution
+			 */
+			void detach();
+
+			/**
 			 * Check if thread is running
 			 */
 			bool isRunning();
@@ -91,11 +110,25 @@ namespace cppthreads {
 			 */
 			void setPriority(int32_t priority);
 
+//			/**
+//			 * Set thread's cancelation type
+//			 */
+//			void setCancelationType(CANCELATION_TYPE type);
+
 			/**
 			 *	Get this thread's ID
 			 */
 			int32_t getId() const;
 
+			/**
+			 * Get the cancellation type
+			 */
+			CANCELATION_TYPE getCancellationType();
+
+			/**
+			 * set the cleanup method that'll be called upon thread cancellation or exit
+			 */
+			void setCleanupHandler(void (*cleanupHandler)(void *), void *args);
 			/**
 			 * Get thread's name
 			 */
@@ -111,12 +144,12 @@ namespace cppthreads {
 			 * Default constructor.
 			 * Can only be used if you extend Thread to override the run method.
 			 */
-			Thread();
+			Thread(bool cancelability=true, CANCELATION_TYPE cancelType=CANCEL_ASYNCHRONOUS, bool detached=false);
 
 			/**
 			 * Creates a new Thread and sets its name.
 			 */
-			Thread(string name);
+			Thread(string name, bool cancelability=true, CANCELATION_TYPE cancelType=CANCEL_ASYNCHRONOUS, bool detached=false);
 
 		private:
 			/**
@@ -160,6 +193,11 @@ namespace cppthreads {
 			pthread_t threadHandle_;
 
 			/**
+			 * POSIX Thread attributes
+			 */
+			pthread_attr_t threadAttr_;
+
+			/**
 			 * Thread started once;
 			 */
 			bool started_;
@@ -167,7 +205,7 @@ namespace cppthreads {
 			/**
 			 * initiaizer method
 			 */
-			void init_();
+			void init_(Runnable *target, bool cancelable, CANCELATION_TYPE cancelType, bool detached);
 
 			/**
 			 * args array to be sent to init
@@ -180,6 +218,32 @@ namespace cppthreads {
 			 * Runnable status
 			 */
 			bool running_;
+
+			/**
+			 * Thread execution can be canceled
+			 */
+			bool cancelable_;
+
+			/**
+			 * Thread cancelation type
+			 */
+			CANCELATION_TYPE cancelType_;
+
+			/**
+			 * Thread cleanup method
+			 * This method will be called upon thread cancellation
+			 */
+			void (*cleanupHandler_) (void *);
+
+			/**
+			 * Args that'll be sent to the cleanupHandler
+			 */
+			void * cleanupArgs_;
+
+			/**
+			 * Thread is detached
+			 */
+			bool detached_;
 
 			friend void * cppthreads_starter_utils::init(void *);
 	};

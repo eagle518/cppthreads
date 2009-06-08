@@ -306,3 +306,21 @@ TEST(ThreadTest, ThreadsRestartingFails){
 	delete myList_;
 
 }
+
+TEST(ThreadTest, ThreadsCancel){
+	SynchornizedList *myList_;
+	Thread *thread1 ;
+
+	myList_ = new SynchornizedList();
+	thread1 = new Thread(new LongRunObj(myList_));
+
+	thread1->start();
+	thread1->cancel();
+	ASSERT_LT(myList_->getSize(),2);
+//	thread1->join();
+//	ASSERT_THROW(thread1->start(), AlreadyStartedException);
+
+	delete thread1;
+	delete myList_;
+
+}
