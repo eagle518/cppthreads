@@ -2,6 +2,7 @@
 #include "ThreadingException.h"
 #include "Thread.h"
 #include "Mutex.h"
+#include <unistd.h>
 #include <gtest/gtest.h>
 #include <iostream>
 
@@ -109,8 +110,11 @@ TEST_F(WaitNotifyTest, testNotifyWait) {
 	Thread* notifier2 = new Thread(new DummyGroupNotifier(object));
 	refCount_ = 0;
 	waiter1->start();
+	//Threads start asyncronously, wait a little for it to start
+	usleep(100);
 	ASSERT_EQ(refCount_, 1);
 	waiter2->start();
+	usleep(100);
 	ASSERT_EQ(refCount_, 2);
 	notifier1->start();
 	notifier1->join();

@@ -8,7 +8,8 @@ runner.cpp\
 SemaphoreTest.cpp\
 MutexTest.cpp\
 LinkedBlockingQueueTest.cpp\
-ThreadTest.cpp
+ThreadTest.cpp\
+WaitNotifyTest.cpp
 runner_DEPENDENCIES = ../src
 runner_LDADD = $(top_srcdir)/src/libcppthreads.la -lgtest -lpthread -lrt 
 runner_LDFLAGS = -all-static 
