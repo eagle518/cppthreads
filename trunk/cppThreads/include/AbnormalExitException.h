@@ -8,7 +8,7 @@
 #ifndef JOINEDTHREADABNORMALEXITEXCEPTION_H_
 #define JOINEDTHREADABNORMALEXITEXCEPTION_H_
 
-#include<sys/types.h>
+#include<stdint.h>
 
 namespace cppthreads {
 	class AbnormalExitException: public ThreadingException {

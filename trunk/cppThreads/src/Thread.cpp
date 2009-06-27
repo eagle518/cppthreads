@@ -28,22 +28,30 @@ namespace cppthreads_starter_utils {
 			// set thread's cancel state
 			pthread_setcancelstate(thread->cancelable_, NULL);
 			pthread_setcanceltype(thread->cancelType_, NULL);
+			cout << "init: checking if we'll add cleanup" << endl;
 			if (thread->cleanupHandler_ != NULL){
+				cout << "init: push cleanup" << endl;
 				// cleanup method
 				pthread_cleanup_push(thread->cleanupHandler_, thread->cleanupArgs_);
 				runnable->run();
 				pthread_cleanup_pop(0);
-			}
-			else{
+				cout << "init: cleanup poped" << endl;
+			} else {
+				cout << "init: no cleanup" << endl;
 				runnable->run();
+				cout << "init: run finished" << endl;
 			}
-
+			cout << "init: setting run with false" << endl;
 			thread->running_ = false;
+			cout << "init: run is false" << endl;
 		 }
 		catch (...) {
 			thread->running_ = false;
+			cout << "init: exception" << endl;
 		}
+			cout << "init: gonna broadcast" << endl;
 			pthread_cond_broadcast( &(thread->threadTerminatedCond_) );
+			cout << "init: broadcasted" << endl;
 			pthread_exit(NULL);
 	}
 }
@@ -67,6 +75,7 @@ namespace cppthreads {
 	}
 
 	void Thread::init_(Runnable *target, bool cancelable, CANCELATION_TYPE cancelType, bool detached) {
+		lock_.lock();
 		started_ = false;
 		running_ = false;
 		cleanupHandler_ = NULL;
@@ -81,7 +90,7 @@ namespace cppthreads {
 		args_[0] = (void *)target_;
 		args_[1] = (void *)this;
 		pthread_attr_setdetachstate(&threadAttr_, detached ? PTHREAD_CREATE_DETACHED : PTHREAD_CREATE_JOINABLE);
-
+		lock_.unlock();
 	}
 
 	void Thread::start() {
@@ -91,8 +100,11 @@ namespace cppthreads {
 			throw AlreadyStartedException("Thread already started, can't run thread twice.", -1);
 		}
 		started_ = true;
+		cout << "Thread::start : creating pthread" << endl;
 		int32_t extCode = pthread_create(&threadHandle_, &threadAttr_,
 								cppthreads_starter_utils::init, (void *)args_);
+
+		cout << "Thread::start : created" << endl;
 		lock_.unlock();
 		if (extCode) {
 			switch (errno) {
@@ -162,15 +174,15 @@ namespace cppthreads {
 			lock_.unlock();
 			throw JoinFailedException("Can't join a detached thread",-1);
 		}
-		struct timespec currentTime;
-		if (clock_gettime(CLOCK_REALTIME, &currentTime) == -1) {
+
+		if (clock_gettime(CLOCK_REALTIME, &currentTime_) == -1) {
 			lock_.unlock();
 			throw JoinFailedException("Cannot retrieve current time", -1);
 			return;
 		}
-		currentTime.tv_sec += timeout;
+		currentTime_.tv_sec += timeout;
 		if(started_ && running_){
-			int32_t extCode = pthread_cond_timedwait(&threadTerminatedCond_, &(lock_.getMutexHandle()), &currentTime);
+			int32_t extCode = pthread_cond_timedwait(&threadTerminatedCond_, &(lock_.getMutexHandle()), &currentTime_);
 			lock_.unlock();
 			if (extCode){
 				if (extCode == ETIMEDOUT){
@@ -278,7 +290,9 @@ namespace cppthreads {
 	}
 
 	Thread::~Thread() {
+		cout << "Destroying thread " << endl;
 		pthread_cond_destroy(&threadTerminatedCond_);
+		pthread_attr_destroy(&threadAttr_);
 		delete target_;
 	}
 

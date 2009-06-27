@@ -7,7 +7,7 @@
 
 #ifndef THREADALREADYSTARTEDEXCEPTION_H_
 #define THREADALREADYSTARTEDEXCEPTION_H_
-#include <sys/types.h>
+#include <stdint.h>
 #include "ThreadingException.h"
 
 namespace cppthreads{

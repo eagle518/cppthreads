@@ -8,7 +8,7 @@
 #ifndef DETACHEXCEPTION_H_
 #define DETACHEXCEPTION_H_
 
-#include<sys/types.h>
+#include<stdint.h>
 
 namespace cppthreads {
 	class DetachException: public ThreadingException {

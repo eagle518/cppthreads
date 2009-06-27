@@ -8,7 +8,7 @@
 #ifndef POSSIBLETHREADDEADLOCKEXCEPTION_H_
 #define POSSIBLETHREADDEADLOCKEXCEPTION_H_
 
-#include<sys/types.h>
+#include<stdint.h>
 
 namespace cppthreads {
 	class PossibleDeadLockException: public ThreadingException {

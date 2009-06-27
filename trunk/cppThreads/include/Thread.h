@@ -13,7 +13,7 @@
 #include <pthread.h>
 #include "Mutex.h"
 #include <string>
-#include <sys/types.h>
+#include <inttypes.h>
 #include <time.h>
 using namespace std;
 
@@ -246,6 +246,8 @@ namespace cppthreads {
 			bool detached_;
 
 			friend void * cppthreads_starter_utils::init(void *);
+
+			struct timespec currentTime_;
 	};
 }
 #endif /* THREAD_H_ */
