@@ -8,7 +8,7 @@
 #ifndef JOINFAILEDEXCEPTION_H_
 #define JOINFAILEDEXCEPTION_H_
 
-#include<sys/types.h>
+#include<stdint.h>
 
 namespace cppthreads {
 	class JoinFailedException: public ThreadingException {

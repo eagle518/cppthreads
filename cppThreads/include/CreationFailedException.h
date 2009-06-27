@@ -9,7 +9,7 @@
 #define THREADCREATIONFAILEDEXCEPTION_H_
 
 #include "ThreadingException.h"
-#include <sys/types.h>
+#include <stdint.h>
 namespace cppthreads {
 	class CreationFailedException: public ThreadingException {
 		private:

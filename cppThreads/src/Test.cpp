@@ -6,13 +6,12 @@
  */
 
 #include <gtest/gtest.h>
-#include <sys/types.h>
 #include <vector>
 #include <time.h>
 #include "Thread.h"
 #include "Runnable.h"
 #include "Mutex.h"
-#include "ThreadAlreadyStartedException.h"
+#include "AlreadyStartedException.h"
 
 using namespace cppthreads;
 using namespace std;

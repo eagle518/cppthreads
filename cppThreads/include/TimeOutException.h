@@ -8,7 +8,7 @@
 #ifndef TIMEOUTEXCEPTION_H_
 #define TIMEOUTEXCEPTION_H_
 
-#include<sys/types.h>
+#include<stdint.h>
 
 namespace cppthreads {
 	class TimeOutException: public ThreadingException {

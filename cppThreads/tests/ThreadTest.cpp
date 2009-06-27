@@ -4,8 +4,8 @@
  *  Created on: May 15, 2009
  *      Author: Abd4llA
  */
+
 #include <gtest/gtest.h>
-#include <sys/types.h>
 #include <vector>
 #include <time.h>
 #include "Thread.h"
@@ -35,7 +35,9 @@ class SynchornizedList : public SuperObject {
 			return ret;
 		}
 		~SynchornizedList() {
+			cout << " SynchronizedList " << this << " deleting container " << container_ << endl;
 			delete container_;
+			cout << "SynchronizedList deleted" << endl ;
 		}
 	protected:
 		Mutex lock_;
@@ -64,11 +66,14 @@ class LongRunObj : public Runnable {
 
 		}
 		void run(){
-			for (int i =0; i < 2; i++) {
+			for (int i =0; i < 4; i++) {
 				elements_->addElement(i);
 				sleep(1);
 			}
 
+		}
+		~LongRunObj(){
+			cout << " Destroying Long Run Obj " << this << endl;
 		}
 	private:
 		SynchornizedList  *elements_;
@@ -270,8 +275,12 @@ TEST(ThreadTest, ThreadsJoinable7){
 	cout << "Current time " << currentTime.tv_sec << endl;*/
 	ASSERT_TRUE(thread1->isRunning());
 	thread1->join();
+	cout << "ThreadsJoinable7: Deleting thread1 & myList_" << endl;
 	delete thread1;
+	cout << "ThreadsJoinable7: Deleted thread1" << endl;
+	cout << "ThreadsJoinable7: Deleting myList_ " << myList_ << endl;
 	delete myList_;
+	cout << "ThreadsJoinable7: Deleted myList_" << endl;
 
 }
 TEST(ThreadTest, ThreadsStartAfterJoin){
@@ -306,8 +315,19 @@ TEST(ThreadTest, ThreadsRestartingFails){
 	delete myList_;
 
 }
+/**
+ * Now we need to test the following:
+ * 1- Canceling a thread state=Enabled/type=ASYNC
+ * 2- Canceling a thread state=Enabled/type=Deffered then join
+ * 3- Canceling a thread state=Disabled
+ * 4- Canceling a thread state=Enabled/type=ASYNC with a cleanup method
+ * 5- Creating a detached thread and making sure we cannot join it
+ * 6- Creating a detached thread and trying to re-detach
+ * 7- Creating a joinable thread and trying to detach it
+ */
 
-TEST(ThreadTest, ThreadsCancel){
+TEST(ThreadTest, CancelThread1){
+
 	SynchornizedList *myList_;
 	Thread *thread1 ;
 
@@ -315,11 +335,30 @@ TEST(ThreadTest, ThreadsCancel){
 	thread1 = new Thread(new LongRunObj(myList_));
 
 	thread1->start();
+	usleep(50);
 	thread1->cancel();
 	ASSERT_LT(myList_->getSize(),2);
-	thread1->join();
 
 	delete thread1;
 	delete myList_;
 
+}
+
+TEST(ThreadTest, CancelThread2){
+
+	SynchornizedList *myList_;
+	Thread *thread1 ;
+
+	myList_ = new SynchornizedList();
+	thread1 = new Thread(new LongRunObj(myList_), true, CANCEL_DEFERRED);
+	cout << "Created Thread" << endl;
+	thread1->start();
+	cout << "Started Thread" << endl;
+	usleep(50);
+	thread1->cancel();
+	cout << "Canceled Thread" << endl;
+	ASSERT_LT(myList_->getSize(),2);
+
+	delete thread1;
+	delete myList_;
 }

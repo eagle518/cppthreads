@@ -1,7 +1,8 @@
 #ifndef SUPEROBJECT_H_
 #define SUPEROBJECT_H_
 
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <pthread.h>
 #include <sstream>
 /**
@@ -19,7 +20,7 @@ class SuperObject {
 		bool wait(uint32_t timeOut);
 		void notify();
 		void notifyAll();
-		
+
 	protected:
 		SuperObject();
 		pthread_cond_t condHandle_;
