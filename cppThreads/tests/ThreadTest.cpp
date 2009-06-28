@@ -358,6 +358,7 @@ TEST(ThreadTest, CancelThread2){
 	thread1->cancel();
 	cout << "Canceled Thread" << endl;
 	ASSERT_LT(myList_->getSize(),2);
+	thread1->join(); //Block until thread terminates to ensure clean destruction
 
 	delete thread1;
 	delete myList_;
