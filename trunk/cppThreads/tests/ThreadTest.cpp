@@ -338,6 +338,7 @@ TEST(ThreadTest, CancelThread1){
 	usleep(50);
 	thread1->cancel();
 	ASSERT_LT(myList_->getSize(),2);
+	thread1->join();
 
 	delete thread1;
 	delete myList_;
