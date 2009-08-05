@@ -9,7 +9,6 @@
 #define MUTEX_H_
 #include "SuperObject.h"
 #include "pthread.h"
-#include <iostream>
 namespace cppthreads {
 	/**
 	 * Initial support only supports NORMAL mutex, not ERROR_CHECK, so there is no deadlock detection for this version.

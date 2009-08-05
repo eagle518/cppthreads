@@ -11,6 +11,7 @@ Mutex.cpp\
 Semaphore.cpp\
 SynchronousQueue.cpp\
 Thread.cpp\
+Condition.cpp\
 SuperObject.cpp
 
 include_HEADERS = \
@@ -20,6 +21,7 @@ $(top_srcdir)/include/Mutex.h\
 $(top_srcdir)/include/Semaphore.h\
 $(top_srcdir)/include/SynchronousQueue.h\
 $(top_srcdir)/include/Thread.h\
+$(top_srcdir)/include/Condition.h\
 $(top_srcdir)/include/Runnable.h\
 $(top_srcdir)/include/SuperObject.h\
 $(top_srcdir)/include/InterruptedException.h\
