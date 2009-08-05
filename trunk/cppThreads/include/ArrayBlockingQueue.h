@@ -5,8 +5,8 @@
  *      Author: ahmed soliman
  */
 
-#ifndef LINKEDBLOCKINGQUEUE_H_
-#define LINKEDBLOCKINGQUEUE_H_
+#ifndef ARRAYBLOCKINGQUEUE_H_
+#define ARRAYBLOCKINGQUEUE_H_
 
 #include "BlockingQueue.h"
 #include "Semaphore.h"
@@ -98,4 +98,4 @@ namespace cppthreads {
 
 	};
 }
-#endif /* LINKEDBLOCKINGQUEUE_H_ */
+#endif /* ARRAYBLOCKINGQUEUE_H_ */
