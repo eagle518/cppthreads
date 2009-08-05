@@ -1,10 +1,3 @@
-/*
- * LinkedBlockingQueue.h
- *
- *  Created on: May 5, 2009
- *      Author: ahmed soliman
- */
-
 #ifndef ARRAYBLOCKINGQUEUE_H_
 #define ARRAYBLOCKINGQUEUE_H_
 
