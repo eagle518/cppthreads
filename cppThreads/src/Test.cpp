@@ -63,8 +63,6 @@ int main(){
 		SynchornizedList * sl = new SynchornizedList();
 		Thread * t1 = new Thread(new RunnableObject(sl));
 		t1->start();
-		cout << "Thread Started" << endl;
-		cout << "Joined" << endl;
 //		t1->join(100);
 		threads[i] = t1;
 	}

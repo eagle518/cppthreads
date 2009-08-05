@@ -28,28 +28,19 @@ namespace cppthreads_starter_utils {
 			// set thread's cancel state
 			pthread_setcancelstate(thread->cancelable_, NULL);
 			pthread_setcanceltype(thread->cancelType_, NULL);
-			cout << "init: checking if we'll add cleanup" << endl;
 			if (thread->cleanupHandler_ != NULL){
-				cout << "init: push cleanup" << endl;
 				// cleanup method
 				pthread_cleanup_push(thread->cleanupHandler_, thread->cleanupArgs_);
 				runnable->run();
 				pthread_cleanup_pop(0);
-				cout << "init: cleanup poped" << endl;
 			} else {
-				cout << "init: no cleanup" << endl;
 				runnable->run();
-				cout << "init: run finished" << endl;
 			}
-			cout << "init: setting run with false" << endl;
 			thread->running_ = false;
-			cout << "init: run is false" << endl;
 		 }
 		catch (...) {
 			thread->running_ = false;
-			cout << "init: exception" << endl;
 		}
-			cout << "init: gonna broadcast" << endl;
 			pthread_cond_broadcast( &(thread->threadTerminatedCond_) );
 			cout << "init: broadcasted" << endl;
 			pthread_exit(NULL);
@@ -100,11 +91,9 @@ namespace cppthreads {
 			throw AlreadyStartedException("Thread already started, can't run thread twice.", -1);
 		}
 		started_ = true;
-		cout << "Thread::start : creating pthread" << endl;
 		int32_t extCode = pthread_create(&threadHandle_, &threadAttr_,
 								cppthreads_starter_utils::init, (void *)args_);
 
-		cout << "Thread::start : created" << endl;
 		lock_.unlock();
 		if (extCode) {
 			switch (errno) {
@@ -290,7 +279,6 @@ namespace cppthreads {
 	}
 
 	Thread::~Thread() {
-		cout << "Destroying thread " << endl;
 		pthread_cond_destroy(&threadTerminatedCond_);
 		pthread_attr_destroy(&threadAttr_);
 		delete target_;
