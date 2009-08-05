@@ -5,6 +5,7 @@ libcppthreads_la_LIBADD = -lpthread -lrt
 libcppthreads_la_CPPFLAGS = -ggdb3 -fPIC -D_REENTRANT -I$(srcdir)/../include
 libcppthreads_la_CFLAGS = -ggdb3 -fPIC -D_REENTRANT -I$(srcdir)/../include
 libcppthreads_la_SOURCES = \
+ArrayBlockingQueue.cpp\
 LinkedBlockingQueue.cpp\
 Mutex.cpp\
 Semaphore.cpp\
@@ -14,6 +15,7 @@ SuperObject.cpp
 
 include_HEADERS = \
 $(top_srcdir)/include/LinkedBlockingQueue.h\
+$(top_srcdir)/include/ArrayBlockingQueue.h\
 $(top_srcdir)/include/Mutex.h\
 $(top_srcdir)/include/Semaphore.h\
 $(top_srcdir)/include/SynchronousQueue.h\
