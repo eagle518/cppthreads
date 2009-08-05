@@ -42,7 +42,6 @@ namespace cppthreads_starter_utils {
 			thread->running_ = false;
 		}
 			pthread_cond_broadcast( &(thread->threadTerminatedCond_) );
-			cout << "init: broadcasted" << endl;
 			pthread_exit(NULL);
 	}
 }
