@@ -8,6 +8,7 @@ runner.cpp\
 SemaphoreTest.cpp\
 MutexTest.cpp\
 LinkedBlockingQueueTest.cpp\
+ArrayBlockingQueueTest.cpp\
 ThreadTest.cpp\
 WaitNotifyTest.cpp
 runner_DEPENDENCIES = ../src
