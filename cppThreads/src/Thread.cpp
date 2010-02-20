@@ -7,6 +7,8 @@
 
 #include <pthread.h>
 #include <errno.h>
+#include <unistd.h>
+#include <signal.h>
 #include "Thread.h"
 #include "CreationFailedException.h"
 #include "AlreadyStartedException.h"
@@ -15,6 +17,7 @@
 #include "TimeOutException.h"
 #include "PossibleDeadLockException.h"
 #include "DetachException.h"
+#include "ThreadingException.h"
 
 using namespace std;
 
@@ -117,7 +120,7 @@ namespace cppthreads {
 	}
 
 	void Thread::run() {
-
+		this->start();
 	}
 
 	void Thread::sleep(int millis) {
@@ -211,8 +214,13 @@ namespace cppthreads {
 		//maybe do some error handling
 	}
 
-	void Thread::kill(){
+	void Thread::kill(int signo){
+		int32_t exitCode;
+		exitCode = pthread_kill(threadHandle_, signo);
 
+		if (exitCode != 0) {
+			throw ThreadingException("Could not kill thread", exitCode);
+		} 
 	}
 
 	void Thread::detach(){

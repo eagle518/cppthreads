@@ -82,7 +82,7 @@ namespace cppthreads {
 			/**
 			 * Send signal to thread
 			 */
-			void kill();
+			void kill(int);
 
 			/**
 			 * Detach thread, making it not joinable
