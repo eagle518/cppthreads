@@ -1,0 +1,15 @@
+#labels Phase-Deploy
+#build cppThreads on ubuntu 10.04
+= Prerequisites =
+The following packages must exist on your system before building:
+  * g++
+  * autotools
+  * libtool
+  * libgtest-dev
+
+
+= Details =
+
+run the following commands
+./autogen.sh
+./buildme.sh
